@@ -148,14 +148,14 @@ export function PostDetailPage({ post, organizationId, userId }: PostDetailPageP
           </PremiumCard>
 
           {/* Hashtags */}
-          {post.hashtags && (
+          {post.caption_master && post.caption_master.includes('#') && (
             <PremiumCard variant="dark">
               <div className="space-y-4">
                 <label className="text-sm text-gray-400 block">Hashtags</label>
                 <div className="flex flex-wrap gap-2">
-                  {post.hashtags.split(',').map((tag, index) => (
+                  {post.caption_master.match(/#[\w]+/g)?.map((tag: string, index: number) => (
                     <Badge key={index} variant="outline" className="border-[#2A2A2E] text-blue-400">
-                      {tag.trim()}
+                      {tag}
                     </Badge>
                   ))}
                 </div>
@@ -195,18 +195,18 @@ export function PostDetailPage({ post, organizationId, userId }: PostDetailPageP
               <div className="flex justify-between">
                 <span className="text-gray-400">Created:</span>
                 <span className="text-gray-300">
-                  {new Date(post.created_at).toLocaleDateString('en-GB', {
+                  {new Date(post.created_at || '').toLocaleDateString('en-GB', {
                     day: '2-digit',
                     month: 'short',
                     year: 'numeric',
                   })}
                 </span>
               </div>
-              {post.scheduled_for && (
+              {post.scheduled_at && (
                 <div className="flex justify-between">
                   <span className="text-gray-400">Scheduled:</span>
                   <span className="text-gray-300">
-                    {new Date(post.scheduled_for).toLocaleDateString('en-GB', {
+                    {new Date(post.scheduled_at || '').toLocaleDateString('en-GB', {
                       day: '2-digit',
                       month: 'short',
                       year: 'numeric',
