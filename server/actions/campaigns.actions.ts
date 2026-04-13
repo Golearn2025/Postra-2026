@@ -11,7 +11,7 @@ import type { CampaignFormValues } from '@/features/campaigns/schemas/campaign.s
 export async function createCampaignAction(
   organizationId: string,
   values: CampaignFormValues
-): Promise<{ error?: string; id?: string }> {
+): Promise<{ error?: string; id?: string } | never> {
   const user = await getCurrentUser()
   if (!user) {
     return { error: 'Unauthorized' }
@@ -37,7 +37,7 @@ export async function updateCampaignAction(
   campaignId: string,
   organizationId: string,
   values: CampaignFormValues
-): Promise<{ error?: string }> {
+): Promise<{ error?: string } | never> {
   const user = await getCurrentUser()
   if (!user) return { error: 'Unauthorized' }
 
@@ -107,11 +107,11 @@ export async function deleteCampaignAction(
 
   if (assetCount > 0) {
     // Collect all storage paths
-    const storagePaths = mediaAssets.flatMap(asset => [
+    const storagePaths = (mediaAssets || []).flatMap((asset: any) => [
       asset.storage_path,
       asset.thumb_storage_path,
       asset.small_storage_path
-    ]).filter(Boolean)
+    ]).filter(Boolean) as string[]
 
     // Delete storage files
     if (storagePaths.length > 0) {
