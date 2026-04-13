@@ -166,7 +166,7 @@ export function CalendarUpcomingPanel({
                                   {slot.campaign_name}
                                 </span>
                               )}
-                              {meta.primaryTopic && (
+                              {(meta.primaryTopic as string) && (
                                 <span className="truncate">{meta.primaryTopic as string}</span>
                               )}
                             </div>
