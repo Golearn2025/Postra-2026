@@ -183,7 +183,7 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
           description: fileMeta.description,
           tags: fileMeta.tags,
           format_group: fileMeta.format_group as any,
-          suggested_platforms: fileMeta.suggested_platforms,
+          suggested_platforms: fileMeta.suggested_platforms as ("facebook" | "instagram" | "linkedin" | "tiktok" | "threads" | "youtube" | "twitter" | "pinterest" | "snapchat" | "reddit")[],
           campaign_id: fileMeta.campaign_id,
         }
 
