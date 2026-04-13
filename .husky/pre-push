@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running pre-push quality gate..."
+npm run check
+
+if [ $? -eq 0 ]; then
+    echo "Pre-push check passed! Pushing..."
+    exit 0
+else
+    echo "Pre-push check failed! Fix the issues before pushing."
+    exit 1
+fi
