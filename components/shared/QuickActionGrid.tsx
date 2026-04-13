@@ -23,6 +23,7 @@ export function QuickActionGrid({ actions, className }: QuickActionGridProps) {
         return (
           <Link
             key={action.href}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             href={action.href as any}
             className="group flex items-center gap-3 rounded-xl border border-canvas-border bg-white p-3.5 transition-all hover:border-accent/30 hover:shadow-card-md"
           >

@@ -38,7 +38,7 @@ export default async function CampaignDetailPage({ params }: CampaignDetailPageP
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Link
-          href={'/campaigns' as any}
+          href="/campaigns"
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />

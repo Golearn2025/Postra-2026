@@ -182,7 +182,7 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
           alt_text: fileMeta.alt_text,
           description: fileMeta.description,
           tags: fileMeta.tags,
-          format_group: fileMeta.format_group as any,
+          format_group: fileMeta.format_group as 'vertical_mobile' | 'portrait_feed' | 'square' | 'landscape' | null,
           suggested_platforms: fileMeta.suggested_platforms as ("facebook" | "instagram" | "linkedin" | "tiktok" | "threads" | "youtube" | "twitter" | "pinterest" | "snapchat" | "reddit")[],
           campaign_id: fileMeta.campaign_id,
         }
@@ -275,7 +275,7 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="space-y-1.5">
             <Label>Type <span className="text-destructive">*</span></Label>
-            <Select defaultValue="image" value={selectedType} onValueChange={(v) => setValue('type', v as any)}>
+            <Select defaultValue="image" value={selectedType} onValueChange={(v) => setValue('type', v as 'image' | 'video' | 'thumbnail' | 'logo')}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {MEDIA_TYPES.map((t) => <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>)}
@@ -284,7 +284,7 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
           </div>
           <div className="space-y-1.5">
             <Label>Source <span className="text-destructive">*</span></Label>
-            <Select defaultValue="uploaded" onValueChange={(v) => setValue('source', v as any)}>
+            <Select defaultValue="uploaded" onValueChange={(v) => setValue('source', v as 'uploaded' | 'ai_generated' | 'imported_manual' | 'rendered_template')}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {MEDIA_SOURCES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s.replace('_', ' ')}</SelectItem>)}
@@ -293,7 +293,7 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
           </div>
           <div className="space-y-1.5">
             <Label>Status <span className="text-destructive">*</span></Label>
-            <Select defaultValue="draft" onValueChange={(v) => setValue('status', v as any)}>
+            <Select defaultValue="draft" onValueChange={(v) => setValue('status', v as 'draft' | 'ready' | 'processing' | 'failed' | 'archived')}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {MEDIA_STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
@@ -314,7 +314,7 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
           </div>
           <div className="space-y-1.5">
             <Label>Campaign</Label>
-            <Select defaultValue="none" onValueChange={(v) => setValue('campaign_id', v === 'none' ? null : v as any)}>
+            <Select defaultValue="none" onValueChange={(v) => setValue('campaign_id', v === 'none' ? null : v as string)}>
               <SelectTrigger><SelectValue placeholder="Select campaign..." /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No campaign</SelectItem>
@@ -332,7 +332,7 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
       {!showReviewTable && (
         <div className="space-y-1.5">
           <Label>Format Group</Label>
-          <Select defaultValue="none" onValueChange={(v) => setValue('format_group', v === 'none' ? null : v as any)}>
+          <Select defaultValue="none" onValueChange={(v) => setValue('format_group', v === 'none' ? null : v as 'vertical_mobile' | 'portrait_feed' | 'square' | 'landscape')}>
             <SelectTrigger><SelectValue placeholder="Select format..." /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">None</SelectItem>
@@ -374,7 +374,7 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
           <MultiSelect
             options={[...PLATFORMS]}
             selected={watch('suggested_platforms') || []}
-            onChange={(platforms) => setValue('suggested_platforms', platforms)}
+            onChange={(platforms) => setValue('suggested_platforms', platforms as ("facebook" | "instagram" | "linkedin" | "tiktok" | "threads" | "youtube" | "twitter" | "pinterest" | "snapchat" | "reddit")[])}
             placeholder="Select platforms..."
           />
           <p className="text-[11px] text-muted-foreground">Select platforms where this asset performs best. Helps with planning and campaign targeting.</p>

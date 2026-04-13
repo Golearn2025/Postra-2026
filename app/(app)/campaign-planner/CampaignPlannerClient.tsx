@@ -15,6 +15,7 @@ import { createDraftPostsAction } from '@/server/actions/campaign-planner.action
 import type { CreateDraftPostsResult } from '@/server/actions/campaign-planner.actions'
 import type { PlannerWizardState } from '@/features/campaign-planner/schemas/planner.schema'
 import type { CampaignPlannerClientProps, SelectedCampaign, SelectedMedia } from '@/types/campaign-planner'
+import type { AppCampaignsListItem, AppMediaAssetsListItem } from '@/types/views'
 import { sanitizeString, sanitizeStringArray, isValidIndex } from '@/utils/type-guards'
 
 export function CampaignPlannerClient({ organizationId, userId, campaigns, mediaAssets }: CampaignPlannerClientProps) {
@@ -104,6 +105,7 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
           <Step1SelectCampaign
             organizationId={organizationId}
             selectedCampaignId={wizardState.selectedCampaignId}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             campaigns={campaigns as any}
             onSelect={(campaignId) => {
               updateWizardState({ selectedCampaignId: campaignId })
@@ -129,12 +131,14 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
               return undefined
             })() : undefined}
             selectedMediaIds={wizardState.selectedMediaIds || []}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onSelect={(mediaIds: string[], mediaAssets: any[]) => {
               updateWizardState({ selectedMediaIds: mediaIds })
               setSelectedMedia(mediaAssets as SelectedMedia[])
             }}
             onNext={nextStep}
             onPrevious={prevStep}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             mediaAssets={mediaAssets as any}
           />
         )}
@@ -156,7 +160,7 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
             })() : undefined}
             selectedAssetsCount={(wizardState.selectedMediaIds || []).length}
             suggestedPlatforms={(() => {
-              const allPlatforms = selectedMedia.flatMap((m: any) => m.suggested_platforms || [])
+              const allPlatforms = selectedMedia.flatMap((m: SelectedMedia) => m.suggested_platforms || [])
               return [...new Set(allPlatforms)] as string[]
             })()}
             onUpdate={updateWizardState}
@@ -177,7 +181,7 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
           <Step5PasteOutput
             aiOutput={wizardState.aiOutput || ''}
             expectedCount={(wizardState.selectedMediaIds || []).length}
-            expectedFilenamesByDay={selectedMedia.map((m: any) => m.original_filename)}
+            expectedFilenamesByDay={selectedMedia.map((m: SelectedMedia) => m.original_filename || '').filter(Boolean)}
             campaignStartDate={sanitizeString(selectedCampaign?.start_date)}
             campaignEndDate={sanitizeString(selectedCampaign?.end_date)}
             onUpdate={(output, drafts) => {
@@ -191,9 +195,12 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
         {currentStep === 6 && (
           <Step6ReviewDrafts
             drafts={wizardState.parsedDrafts || []}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             mediaUrlMap={Object.fromEntries(
               selectedMedia
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .filter((m: any) => m.original_filename && m.signedUrl)
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .map((m: any) => [m.original_filename, m.signedUrl])
             )}
             onUpdateDrafts={(drafts) => updateWizardState({ parsedDrafts: drafts })}

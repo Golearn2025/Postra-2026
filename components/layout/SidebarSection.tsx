@@ -24,7 +24,8 @@ export function SidebarSection({ section, pathname }: SidebarSectionProps) {
           return (
             <li key={item.href}>
               <Link
-                href={item.href as string}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                href={item.href as any}
                 className={cn(
                   'group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors duration-100',
                   isActive

@@ -263,16 +263,20 @@ export function MediaLibraryTable({ assets, organizationId, pagination, sort }: 
       />
       
       <DataTable
-        columns={columns}
-        data={assets}
-        actions={actions}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        columns={columns as any}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data={assets as any}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        actions={actions as any}
         sort={sort}
         onSortChange={handleSortChange}
         emptyMessage="No media assets found"
         selectable={true}
         selectedRows={selectedRows}
         onSelectionChange={setSelectedRows}
-        getRowId={(asset) => asset.id}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        getRowId={(asset: any) => String(asset.id)}
         showRowNumber={true}
       />
       
