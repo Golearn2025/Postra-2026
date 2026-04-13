@@ -11,9 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import type { DataTableProps, DataTableColumn } from './types'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-export function DataTable<TData extends Record<string, any>>({
+export function DataTable<TData extends Record<string, unknown>>({
   columns,
   data,
   actions,
@@ -27,7 +25,7 @@ export function DataTable<TData extends Record<string, any>>({
   selectable = false,
   selectedRows = new Set(),
   onSelectionChange,
-  getRowId = (row) => row.id,
+  getRowId = (row) => String(row.id),
   bulkActions,
   showRowNumber = false,
 }: DataTableProps<TData>) {
@@ -64,10 +62,9 @@ export function DataTable<TData extends Record<string, any>>({
 
   const handleSort = (column: DataTableColumn<TData>) => {
     if (!column.sortable || !onSortChange) return
-
+    
     const columnId = column.accessorKey?.toString() || column.id
-    const currentDirection = sort?.column === columnId ? sort.direction : null
-    const newDirection = currentDirection === 'asc' ? 'desc' : 'asc'
+    const newDirection = sort?.column === columnId && sort.direction === 'asc' ? 'desc' : 'asc'
     
     onSortChange(columnId, newDirection)
   }
@@ -85,16 +82,7 @@ export function DataTable<TData extends Record<string, any>>({
     )
   }
 
-  const getCellValue = (row: TData, column: DataTableColumn<TData>) => {
-    if (column.cell) {
-      return column.cell(row)
-    }
-    if (column.accessorKey) {
-      return row[column.accessorKey]
-    }
-    return null
-  }
-
+  
   if (error) {
     return (
       <div className="flex items-center justify-center py-12 text-sm text-destructive">
@@ -199,7 +187,7 @@ export function DataTable<TData extends Record<string, any>>({
                 )}
                 {columns.map((column) => (
                   <td key={column.id} className="px-4 py-3 text-foreground">
-                    {getCellValue(row, column)}
+                    {String(row[column.accessorKey!] ?? '')}
                   </td>
                 ))}
                 {actions && actions.length > 0 && (

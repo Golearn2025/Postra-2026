@@ -15,7 +15,6 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { appConfig } from '@/config/app-config'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export const metadata: Metadata = { title: 'Campaigns' }
 
@@ -77,7 +76,7 @@ export default async function CampaignsPage({ searchParams }: CampaignsPageProps
         title="Campaigns"
         description={`Manage content campaigns for ${orgContext.organization.name}.`}
         actions={
-          <Link href={'/campaigns/new' as any}>
+          <Link href="/campaigns/new">
             <Button size="sm"><Plus className="mr-1.5 h-4 w-4" />New Campaign</Button>
           </Link>
         }
@@ -104,7 +103,7 @@ export default async function CampaignsPage({ searchParams }: CampaignsPageProps
           }
           action={
             !params.search && !params.status && !params.pillar ? (
-              <Link href={'/campaigns/new' as any}>
+              <Link href="/campaigns/new">
                 <Button size="sm"><Plus className="mr-1.5 h-4 w-4" />New Campaign</Button>
               </Link>
             ) : undefined

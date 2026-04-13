@@ -9,7 +9,6 @@ import { getCurrentUser } from '@/server/services/auth.service'
 import { getCurrentOrganizationContext } from '@/server/services/organization.service'
 import { getCampaignDetailById } from '@/server/repositories/campaigns.repository'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSupabaseServerClient } from '@/server/supabase/server'
 import { appConfig } from '@/config/app-config'
 import { EditCampaignForm } from '@/features/campaigns/forms/EditCampaignForm'
@@ -28,7 +27,7 @@ export default async function CampaignDetailPage({ params }: CampaignDetailPageP
   const cookieStore = await cookies()
   const selectedOrgSlug = cookieStore.get('selected-org')?.value
   const orgContext = await getCurrentOrganizationContext(user!, selectedOrgSlug)
-  if (!orgContext) redirect('/campaigns' as any)
+  if (!orgContext) redirect('/campaigns')
 
   const { campaignId } = await params
   const supabase = await getSupabaseServerClient()
