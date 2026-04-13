@@ -161,6 +161,29 @@ export async function createCampaign(
     .single()
 
   if (error) {
+    // Handle duplicate key error by retrying with a new slug
+    if (error.code === '23505' && error.message?.includes('content_campaigns_organization_id_slug_key')) {
+      console.log('Duplicate slug detected, retrying with new slug...')
+      // Generate a new slug with timestamp
+      const newSlug = `${values.slug}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      
+      const { data: retryData, error: retryError } = await supabase
+        .from('content_campaigns')
+        .insert({
+          ...insertData,
+          slug: newSlug
+        })
+        .select()
+        .single()
+
+      if (retryError) {
+        console.error('createCampaign retry error:', retryError)
+        return null
+      }
+
+      return retryData as DbContentCampaign
+    }
+    
     console.error('createCampaign error:', error)
     return null
   }
