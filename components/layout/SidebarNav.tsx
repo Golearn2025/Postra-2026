@@ -1,8 +1,6 @@
 'use client'
 
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils/cn'
 import { mainNavSections } from '@/config/navigation'
 import { OrganizationSwitcher } from '@/components/shared/OrganizationSwitcher'
 import { UserMenu } from '@/components/shared/UserMenu'

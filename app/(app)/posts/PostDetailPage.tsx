@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PremiumCard } from '@/components/premium/PremiumCard'
 import { ArrowLeft, Edit, Save, Eye, Copy, Archive, Trash2 } from 'lucide-react'
-import { cn } from '@/lib/utils/cn'
 import type { AppPostsListItem } from '@/types/views'
 
 interface PostDetailPageProps {

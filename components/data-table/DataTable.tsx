@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import type { DataTableProps, DataTableColumn } from './types'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export function DataTable<TData extends Record<string, any>>({
   columns,
   data,

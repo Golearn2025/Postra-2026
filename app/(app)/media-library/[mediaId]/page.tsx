@@ -27,7 +27,7 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
   const cookieStore = await cookies()
   const selectedOrgSlug = cookieStore.get('selected-org')?.value
   const orgContext = await getCurrentOrganizationContext(user!, selectedOrgSlug)
-  if (!orgContext) redirect('/media-library' as any)
+  if (!orgContext) redirect('/media-library')
 
   const { mediaId } = await params
   const supabase = await getSupabaseServerClient()
@@ -40,7 +40,7 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Link
-          href={'/media-library' as any}
+          href="/media-library"
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />

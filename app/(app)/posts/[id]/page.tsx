@@ -43,7 +43,7 @@ export default async function PostDetail({ params }: PostDetailPageProps) {
       <div className="min-h-screen bg-[#0B0B0D] text-white flex items-center justify-center p-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2">Post Not Found</h2>
-          <p className="text-gray-400">The post you're looking for doesn't exist.</p>
+          <p className="text-gray-400">The post you&apos;re looking for doesn&apos;t exist.</p>
         </div>
       </div>
     )

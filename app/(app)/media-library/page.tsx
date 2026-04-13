@@ -65,7 +65,7 @@ export default async function MediaLibraryPage({ searchParams }: MediaLibraryPag
         title="Media Library"
         description={`Manage images and videos for ${orgContext.organization.name}.`}
         actions={
-          <Link href={'/media-library/upload' as any}>
+          <Link href="/media-library/upload">
             <Button size="sm"><Upload className="mr-1.5 h-4 w-4" />Upload Media</Button>
           </Link>
         }
@@ -86,7 +86,7 @@ export default async function MediaLibraryPage({ searchParams }: MediaLibraryPag
           }
           action={
             !params.search && !params.type && !params.source && !params.status ? (
-              <Link href={'/media-library/upload' as any}>
+              <Link href="/media-library/upload">
                 <Button size="sm"><Upload className="mr-1.5 h-4 w-4" />Upload Media</Button>
               </Link>
             ) : undefined
