@@ -3,8 +3,9 @@ import { getSupabaseServerClient } from '@/server/supabase/server'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
+  const params = await context.params
   try {
     const path = params.path.join('/')
     
