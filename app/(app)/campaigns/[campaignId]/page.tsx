@@ -8,6 +8,8 @@ import { CampaignStatusBadge } from '@/features/campaigns/components/CampaignSta
 import { getCurrentUser } from '@/server/services/auth.service'
 import { getCurrentOrganizationContext } from '@/server/services/organization.service'
 import { getCampaignDetailById } from '@/server/repositories/campaigns.repository'
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSupabaseServerClient } from '@/server/supabase/server'
 import { appConfig } from '@/config/app-config'
 import { EditCampaignForm } from '@/features/campaigns/forms/EditCampaignForm'

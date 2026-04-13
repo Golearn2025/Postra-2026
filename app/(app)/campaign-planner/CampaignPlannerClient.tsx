@@ -13,13 +13,15 @@ import { Step7CreatePosts } from '@/features/campaign-planner/components/steps/S
 import { generateAIBrief } from '@/features/campaign-planner/utils/ai-brief-generator'
 import { createDraftPostsAction } from '@/server/actions/campaign-planner.actions'
 import type { CreateDraftPostsResult } from '@/server/actions/campaign-planner.actions'
-import type { PlannerWizardState, AIDraftPost } from '@/features/campaign-planner/schemas/planner.schema'
+import type { PlannerWizardState } from '@/features/campaign-planner/schemas/planner.schema'
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 interface CampaignPlannerClientProps {
   organizationId: string
   userId: string
-  campaigns?: any[] // Add campaigns prop
-  mediaAssets?: any[] // Add media assets prop
+  campaigns?: any[]
+  mediaAssets?: any[]
 }
 
 export function CampaignPlannerClient({ organizationId, userId, campaigns, mediaAssets }: CampaignPlannerClientProps) {

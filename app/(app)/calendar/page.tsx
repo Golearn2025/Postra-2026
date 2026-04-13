@@ -69,7 +69,7 @@ export default async function CalendarPage() {
           if (!thumbnailUrl || !thumbnailUrl.startsWith('http')) {
             thumbnailUrl = null
           }
-        } catch (error) {
+        } catch {
           thumbnailUrl = null
         }
       }
@@ -81,7 +81,7 @@ export default async function CalendarPage() {
           if (!thumbnailUrl || !thumbnailUrl.startsWith('http')) {
             thumbnailUrl = null
           }
-        } catch (error) {
+        } catch {
           thumbnailUrl = null
         }
       }
@@ -93,7 +93,7 @@ export default async function CalendarPage() {
           if (!thumbnailUrl || !thumbnailUrl.startsWith('http')) {
             thumbnailUrl = null
           }
-        } catch (error) {
+        } catch {
           thumbnailUrl = null
         }
       }

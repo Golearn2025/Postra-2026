@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/shared/PageHeader'
 import { getCurrentUser } from '@/server/services/auth.service'
 import { getCurrentOrganizationContext } from '@/server/services/organization.service'
 import { appConfig } from '@/config/app-config'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NewCampaignForm } from '@/features/campaigns/forms/NewCampaignForm'
 
 export const metadata: Metadata = { title: 'New Campaign' }

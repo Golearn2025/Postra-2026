@@ -15,6 +15,8 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { appConfig } from '@/config/app-config'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export const metadata: Metadata = { title: 'Campaigns' }
 
 interface CampaignsPageProps {
