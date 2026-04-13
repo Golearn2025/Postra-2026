@@ -6,10 +6,10 @@ import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MEDIA_TYPES, MEDIA_SOURCES, MEDIA_STATUSES } from '../schemas/media-asset.schema'
-import type { DbContentCampaign } from '@/types/database'
+import type { AppCampaignsListItem } from '@/types/views'
 
 interface MediaFiltersProps {
-  campaigns?: DbContentCampaign[]
+  campaigns?: AppCampaignsListItem[]
 }
 
 export function MediaFilters({ campaigns = [] }: MediaFiltersProps) {
