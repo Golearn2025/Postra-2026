@@ -172,7 +172,7 @@ export function CalendarUpcomingPanel({
                             </div>
 
                             {/* Preview hashtags */}
-                            {meta.hashtags && Array.isArray(meta.hashtags) && meta.hashtags.length > 0 && (
+                            {(meta.hashtags as string[]) && Array.isArray(meta.hashtags) && meta.hashtags.length > 0 && (
                               <div className="mt-2 flex gap-1">
                                 {meta.hashtags.slice(0, 2).map((tag: string, idx: number) => (
                                   <span key={idx} className="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded-full truncate max-w-[80px]">
