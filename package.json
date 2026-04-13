@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm ci --prefer-offline --no-audit --no-fund && next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "postinstall": "echo 'Dependencies installed successfully'"
   },
   "dependencies": {
     "next": "^15.1.0",
