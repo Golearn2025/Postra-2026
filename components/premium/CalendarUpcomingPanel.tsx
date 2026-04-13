@@ -167,7 +167,7 @@ export function CalendarUpcomingPanel({
                                 </span>
                               )}
                               {meta.primaryTopic && (
-                                <span className="truncate">{meta.primaryTopic}</span>
+                                <span className="truncate">{meta.primaryTopic as string}</span>
                               )}
                             </div>
 
