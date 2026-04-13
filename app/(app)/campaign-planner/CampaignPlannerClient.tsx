@@ -14,15 +14,8 @@ import { generateAIBrief } from '@/features/campaign-planner/utils/ai-brief-gene
 import { createDraftPostsAction } from '@/server/actions/campaign-planner.actions'
 import type { CreateDraftPostsResult } from '@/server/actions/campaign-planner.actions'
 import type { PlannerWizardState } from '@/features/campaign-planner/schemas/planner.schema'
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-interface CampaignPlannerClientProps {
-  organizationId: string
-  userId: string
-  campaigns?: any[]
-  mediaAssets?: any[]
-}
+import type { CampaignPlannerClientProps, SelectedCampaign, SelectedMedia } from '@/types/campaign-planner'
+import { sanitizeString, sanitizeStringArray, isValidIndex } from '@/utils/type-guards'
 
 export function CampaignPlannerClient({ organizationId, userId, campaigns, mediaAssets }: CampaignPlannerClientProps) {
   const [currentStep, setCurrentStep] = useState(1)
@@ -35,8 +28,8 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
     aiOutput: '',
     parsedDrafts: [],
   })
-  const [selectedCampaign, setSelectedCampaign] = useState<any>(null)
-  const [selectedMedia, setSelectedMedia] = useState<any[]>([])
+  const [selectedCampaign, setSelectedCampaign] = useState<SelectedCampaign | null>(null)
+  const [selectedMedia, setSelectedMedia] = useState<SelectedMedia[]>([])
   const [aiBrief, setAiBrief] = useState('')
 
   const updateWizardState = (updates: Partial<PlannerWizardState>) => {
@@ -50,17 +43,17 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
       // Generate AI brief when moving to step 4
       if (currentStep === 3 && selectedCampaign) {
         const brief = generateAIBrief({
-          campaignName: selectedCampaign.name,
-          campaignObjective: selectedCampaign.objective,
-          campaignTargetAudience: selectedCampaign.target_audience,
-          campaignTargetMarket: selectedCampaign.target_market,
-          campaignStartDate: selectedCampaign.start_date,
-          campaignEndDate: selectedCampaign.end_date,
+          campaignName: sanitizeString(selectedCampaign?.name),
+          campaignObjective: sanitizeString(selectedCampaign?.objective),
+          campaignTargetAudience: sanitizeString(selectedCampaign?.target_audience),
+          campaignTargetMarket: sanitizeString(selectedCampaign?.target_market),
+          campaignStartDate: sanitizeString(selectedCampaign?.start_date),
+          campaignEndDate: sanitizeString(selectedCampaign?.end_date),
           mediaAssets: selectedMedia.map(m => ({
-            filename: m.original_filename,
-            title: m.title,
-            description: m.description || '',
-            tags: m.tags || [],
+            filename: sanitizeString(m.original_filename),
+            title: sanitizeString(m.title),
+            description: sanitizeString(m.description),
+            tags: sanitizeStringArray(m.tags),
           })),
           platforms: wizardState.platforms || [],
           toneOfVoice: wizardState.toneOfVoice || [],
@@ -85,7 +78,10 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
 
     const mediaMap: Record<string, string> = {}
     selectedMedia.forEach(asset => {
-      mediaMap[asset.original_filename] = asset.id
+      const filename = sanitizeString(asset.original_filename)
+      if (filename) {
+        mediaMap[filename] = asset.id
+      }
     })
 
     return createDraftPostsAction(
@@ -108,7 +104,7 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
           <Step1SelectCampaign
             organizationId={organizationId}
             selectedCampaignId={wizardState.selectedCampaignId}
-            campaigns={campaigns}
+            campaigns={campaigns as any}
             onSelect={(campaignId) => {
               updateWizardState({ selectedCampaignId: campaignId })
               // Fetch campaign details
@@ -135,11 +131,11 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
             selectedMediaIds={wizardState.selectedMediaIds || []}
             onSelect={(mediaIds: string[], mediaAssets: any[]) => {
               updateWizardState({ selectedMediaIds: mediaIds })
-              setSelectedMedia(mediaAssets)
+              setSelectedMedia(mediaAssets as SelectedMedia[])
             }}
             onNext={nextStep}
             onPrevious={prevStep}
-            mediaAssets={mediaAssets}
+            mediaAssets={mediaAssets as any}
           />
         )}
 
@@ -149,7 +145,7 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
             toneOfVoice={wizardState.toneOfVoice || []}
             topics={wizardState.topics || []}
             additionalNotes={wizardState.additionalNotes || ''}
-            campaignName={selectedCampaign?.name}
+            campaignName={sanitizeString(selectedCampaign?.name)}
             campaignDuration={selectedCampaign ? (() => {
               if (selectedCampaign.start_date && selectedCampaign.end_date) {
                 const start = new Date(selectedCampaign.start_date)
@@ -182,8 +178,8 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
             aiOutput={wizardState.aiOutput || ''}
             expectedCount={(wizardState.selectedMediaIds || []).length}
             expectedFilenamesByDay={selectedMedia.map((m: any) => m.original_filename)}
-            campaignStartDate={selectedCampaign?.start_date}
-            campaignEndDate={selectedCampaign?.end_date}
+            campaignStartDate={sanitizeString(selectedCampaign?.start_date)}
+            campaignEndDate={sanitizeString(selectedCampaign?.end_date)}
             onUpdate={(output, drafts) => {
               updateWizardState({ aiOutput: output, parsedDrafts: drafts })
             }}
