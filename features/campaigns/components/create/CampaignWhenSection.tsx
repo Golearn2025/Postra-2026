@@ -21,15 +21,14 @@ export function CampaignWhenSection({
   onChange,
   errors
 }: CampaignWhenSectionProps) {
-  const handleAddDate = (dateStr: string) => {
-    if (!dateStr) return
-    if (!formData.selectedDates.includes(dateStr)) {
-      onChange('selectedDates', [...formData.selectedDates, dateStr].sort())
+  const handleDateToggle = (dateStr: string) => {
+    const currentDates = formData.selectedDates || []
+    if (!currentDates.includes(dateStr)) {
+      onChange('selectedDates', [...currentDates, dateStr].sort())
+    } else {
+      // Remove date
+      onChange('selectedDates', currentDates.filter((d: string) => d !== dateStr))
     }
-  }
-
-  const handleRemoveDate = (dateStr: string) => {
-    onChange('selectedDates', formData.selectedDates.filter((d: string) => d !== dateStr))
   }
 
   return (
@@ -65,9 +64,8 @@ export function CampaignWhenSection({
 
       {formData.scheduleType === 'selected_dates' && (
         <SelectedDatesFields
-          selectedDates={formData.selectedDates}
-          onAddDate={handleAddDate}
-          onRemoveDate={handleRemoveDate}
+          selectedDates={formData.selectedDates || []}
+          onDateToggle={handleDateToggle}
           errors={errors}
         />
       )}

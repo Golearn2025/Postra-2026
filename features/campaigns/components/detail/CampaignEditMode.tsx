@@ -43,6 +43,18 @@ export function CampaignEditMode({ campaign, onSave, isSaving }: CampaignEditMod
     }
   }
 
+  const handleAddDate = (date: string) => {
+    const currentDates = formData.selectedDates || []
+    if (!currentDates.includes(date)) {
+      setFormData(prev => ({ ...prev, selectedDates: [...currentDates, date].sort() }))
+    }
+  }
+
+  const handleRemoveDate = (date: string) => {
+    const currentDates = formData.selectedDates || []
+    setFormData(prev => ({ ...prev, selectedDates: currentDates.filter(d => d !== date) }))
+  }
+
   return (
     <div className="h-full overflow-y-auto">
       <form onSubmit={(e) => { e.preventDefault(); onSave(formData) }} className="space-y-6">
@@ -50,7 +62,7 @@ export function CampaignEditMode({ campaign, onSave, isSaving }: CampaignEditMod
           {/* Left Column - What */}
           <div className="space-y-6">
             <EditCampaignWhatSection
-              formData={formData}
+              formData={formData as any}
               onChange={handleChange}
               errors={errors}
             />
@@ -59,8 +71,10 @@ export function CampaignEditMode({ campaign, onSave, isSaving }: CampaignEditMod
           {/* Middle Column - When */}
           <div className="space-y-6">
             <EditCampaignWhenSection
-              formData={formData}
+              formData={formData as any}
               onChange={handleChange}
+              onAddDate={handleAddDate}
+              onRemoveDate={handleRemoveDate}
               errors={errors}
             />
           </div>
@@ -68,12 +82,12 @@ export function CampaignEditMode({ campaign, onSave, isSaving }: CampaignEditMod
           {/* Right Column - Who & Notes */}
           <div className="space-y-6">
             <EditCampaignWhoSection
-              formData={formData}
+              formData={formData as any}
               onChange={handleChange}
               errors={errors}
             />
             <EditCampaignNotesSection
-              formData={formData}
+              formData={formData as any}
               onChange={handleChange}
               errors={errors}
             />

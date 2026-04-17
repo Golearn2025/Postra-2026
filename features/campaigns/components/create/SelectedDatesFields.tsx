@@ -9,22 +9,20 @@ import { cn } from '@/lib/utils/cn'
 
 interface SelectedDatesFieldsProps {
   selectedDates: string[]
-  onAddDate: (dateStr: string) => void
-  onRemoveDate: (dateStr: string) => void
+  onDateToggle: (dateStr: string) => void
   errors: Record<string, string>
 }
 
 export function SelectedDatesFields({
   selectedDates,
-  onAddDate,
-  onRemoveDate,
+  onDateToggle,
   errors
 }: SelectedDatesFieldsProps) {
   const [newDate, setNewDate] = useState('')
 
   const handleAddDate = () => {
     if (newDate) {
-      onAddDate(newDate)
+      onDateToggle(newDate)
       setNewDate('')
     }
   }
@@ -119,7 +117,7 @@ export function SelectedDatesFields({
                   </span>
                   <button
                     type="button"
-                    onClick={() => onRemoveDate(date)}
+                    onClick={() => onDateToggle(date)}
                     className="ml-1 text-slate-400 hover:text-red-500 transition-colors"
                   >
                     <X className="h-4 w-4" />
