@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils/cn'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { CampaignPremiumHeader } from './CampaignPremiumHeader'
 import { CampaignSidebar } from './CampaignSidebar'
-import { CampaignDebugPanel } from './CampaignDebugPanel'
 import { CampaignWhatSection } from './CampaignWhatSection'
 import { CampaignWhoSection } from './CampaignWhoSection'
 import { CampaignWhenSection } from './CampaignWhenSection'
@@ -109,7 +108,6 @@ export function CampaignFormRoot({
     try {
       await onSubmit(formData)
     } catch (error) {
-      console.error('[SUBMIT ERROR]', error)
       setErrors({ general: 'Failed to create campaign. Please try again.' })
     } finally {
       setIsSubmitting(false)
@@ -255,9 +253,6 @@ export function CampaignFormRoot({
           </div>
         </div>
       </form>
-
-      {/* Debug Panel - Remove in production */}
-      <CampaignDebugPanel formData={formData} />
     </div>
   )
 }

@@ -47,7 +47,6 @@ export function CreateCampaignGuidedForm({
 
       router.push('/campaigns')
     } catch (error) {
-      console.error('[CAMPAIGN CREATE]', error)
       throw error
     }
   }

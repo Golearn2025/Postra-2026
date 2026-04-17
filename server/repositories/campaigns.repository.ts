@@ -315,7 +315,6 @@ export async function createCampaign(
     .single()
 
   if (error) {
-    console.error('[DB ERROR] Campaign insert failed:', error.message, error.details)
     return null
   }
 
@@ -334,7 +333,6 @@ export async function createCampaign(
       .insert(campaignDates)
 
     if (datesError) {
-      console.error('[DB ERROR] Campaign dates insert failed:', datesError.message)
       // Rollback campaign creation
       await supabase
         .from('content_campaigns')
