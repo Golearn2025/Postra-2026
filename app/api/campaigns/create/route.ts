@@ -16,18 +16,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
 
-    console.log('[CREATE CAMPAIGN]', user.profile.email, '→', data.name)
     const result = await createCampaignAction(organizationId, data)
 
     if (result.error) {
-      console.error('[CREATE CAMPAIGN ERROR]', result.error)
       return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
-    console.log('[CREATE CAMPAIGN SUCCESS]', result.campaign?.id)
     return NextResponse.json({ success: true, campaign: result.campaign })
   } catch (error) {
-    console.error('[CREATE CAMPAIGN FATAL]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
