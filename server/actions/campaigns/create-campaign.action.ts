@@ -33,13 +33,16 @@ export async function createCampaignAction(
     targetAudience: orgProfile?.targetAudience || null
   })
 
-  // Create campaign with validated data
-  const campaign = await createCampaign(
-    supabase,
-    organizationId,
-    user.profile.id,
-    parsed.data
-  )
+  // Merge defaults with user input (user input takes precedence)
+  const finalData = {
+    ...defaults,
+    ...parsed.data
+  }
+
+  console.log('[CAMPAIGN ACTION] Final data:', finalData)
+  console.log('[CAMPAIGN ACTION] Slug value:', finalData.slug)
+  console.log('[CAMPAIGN ACTION] Slug type:', typeof finalData.slug)
+  const campaign = await createCampaign(supabase, organizationId, user.profile.id, finalData)
 
   if (!campaign) {
     console.error('[DB INSERT FAILED]')

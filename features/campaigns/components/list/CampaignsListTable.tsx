@@ -134,7 +134,7 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
   }
 
   const handleEdit = (campaign: AppCampaignsListItem) => {
-    router.push(`/campaigns/${campaign.id}/edit`)
+    router.push(`/campaigns/${campaign.id}`)
   }
 
   const handleArchive = async (campaign: AppCampaignsListItem) => {

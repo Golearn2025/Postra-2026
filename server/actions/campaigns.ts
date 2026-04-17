@@ -117,11 +117,24 @@ export async function deleteCampaignAction(
     }
   }
 
-  // Soft delete campaign
+  // Get campaign data before delete to clean up slug
+  const { data: campaignData, error: campaignFetchError } = await supabase
+    .from('content_campaigns')
+    .select('slug')
+    .eq('id', campaignId)
+    .single()
+
+  if (campaignFetchError || !campaignData) {
+    console.error('Failed to fetch campaign data for deletion:', campaignFetchError)
+    return { error: 'Failed to fetch campaign data. Please try again.' }
+  }
+
+  // Soft delete campaign with slug cleanup
   const { error: campaignDeleteError } = await supabase
     .from('content_campaigns')
     .update({
       deleted_at: now,
+      slug: `deleted-${campaignData.slug}-${Date.now()}`,
       updated_by: user.profile.id,
       updated_at: now,
     })

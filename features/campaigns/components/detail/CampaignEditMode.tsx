@@ -12,9 +12,10 @@ interface CampaignEditModeProps {
   campaign: AppCampaignDetail
   onSave: (data: CreateCampaignFormData) => void
   isSaving: boolean
+  onFormDataChange?: (data: CreateCampaignFormData) => void
 }
 
-export function CampaignEditMode({ campaign, onSave, isSaving }: CampaignEditModeProps) {
+export function CampaignEditMode({ campaign, onSave, isSaving, onFormDataChange }: CampaignEditModeProps) {
   const [formData, setFormData] = useState<CreateCampaignFormData>({
     name: campaign.name || '',
     campaignPillar: (campaign.campaign_pillar as CampaignPillar) || undefined,
@@ -33,7 +34,14 @@ export function CampaignEditMode({ campaign, onSave, isSaving }: CampaignEditMod
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    const newFormData = { ...formData, [field]: value }
+    setFormData(newFormData)
+    
+    // Notify parent of form data changes
+    if (onFormDataChange) {
+      onFormDataChange(newFormData)
+    }
+    
     if (errors[field]) {
       setErrors(prev => {
         const newErrors = { ...prev }

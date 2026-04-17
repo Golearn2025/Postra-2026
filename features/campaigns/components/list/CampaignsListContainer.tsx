@@ -21,7 +21,7 @@ interface CampaignsListContainerProps {
 }
 
 export function CampaignsListContainer({ campaigns, pagination }: CampaignsListContainerProps) {
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards')
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table')
 
   return (
     <div className="space-y-6">

@@ -56,7 +56,7 @@ export function CampaignFormRoot({
     endDate: initialData?.endDate,
     selectedDates: initialData?.selectedDates,
     description: initialData?.description,
-    slug: initialData?.slug,
+    slug: initialData?.slug || '',
     status: initialData?.status || 'draft'
   })
 

@@ -7,6 +7,7 @@ import { Edit, Eye, Save, X, Megaphone } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { CampaignStatusBadge } from '../CampaignStatusBadge'
 import type { AppCampaignDetail } from '@/types/views'
+import type { CreateCampaignFormData } from '@/types/campaigns'
 import { CampaignViewMode } from './CampaignViewMode'
 import { CampaignEditMode } from './CampaignEditMode'
 
@@ -19,25 +20,45 @@ export function CampaignViewEdit({ campaign, organizationName }: CampaignViewEdi
   const router = useRouter()
   const [isEditMode, setIsEditMode] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [formData, setFormData] = useState<CreateCampaignFormData>({} as CreateCampaignFormData)
 
-  const handleSave = async (updatedData: any) => {
+  const handleSave = async (updatedData: CreateCampaignFormData) => {
     setIsSaving(true)
     try {
-      const response = await fetch(`/api/campaigns/${campaign.id}/update`, {
+      console.log('[SAVE] Starting save with data:', updatedData)
+      console.log('[SAVE] Campaign ID:', campaign.id)
+      
+      const response = await fetch(`/api/campaigns/${campaign.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData)
       })
 
-      if (!response.ok) throw new Error('Failed to update campaign')
+      console.log('[SAVE] Response status:', response.status)
+      console.log('[SAVE] Response ok:', response.ok)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('[SAVE] Error response:', errorText)
+        throw new Error(`Failed to update campaign: ${response.status} ${errorText}`)
+      }
+
+      const responseData = await response.json()
+      console.log('[SAVE] Response data:', responseData)
 
       router.refresh()
       setIsEditMode(false)
+      console.log('[SAVE] Save completed successfully')
     } catch (error) {
       console.error('[UPDATE ERROR]', error)
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleSaveClick = () => {
+    console.log('[SAVE CLICK] Current formData:', formData)
+    handleSave(formData)
   }
 
   return (
@@ -86,7 +107,7 @@ export function CampaignViewEdit({ campaign, organizationName }: CampaignViewEdi
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => handleSave({})}
+                  onClick={handleSaveClick}
                   disabled={isSaving}
                   className="gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg"
                 >
@@ -103,10 +124,11 @@ export function CampaignViewEdit({ campaign, organizationName }: CampaignViewEdi
       <div className="flex-1 overflow-hidden">
         <div className="h-full max-w-7xl mx-auto px-8 py-6">
           {isEditMode ? (
-            <CampaignEditMode
-              campaign={campaign}
-              onSave={handleSave}
+            <CampaignEditMode 
+              campaign={campaign} 
+              onSave={handleSave} 
               isSaving={isSaving}
+              onFormDataChange={setFormData}
             />
           ) : (
             <CampaignViewMode campaign={campaign} />

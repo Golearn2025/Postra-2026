@@ -287,10 +287,16 @@ export async function createCampaign(
   data: CreateCampaignInput
 ): Promise<DbContentCampaign | null> {
   // Prepare campaign data with proper typing
+  console.log('[REPO] Input data.slug:', data.slug)
+  console.log('[REPO] Input data.slug type:', typeof data.slug)
+  
+  const slugValue = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || `campaign-${Date.now()}`
+  console.log('[REPO] Final slugValue:', slugValue)
+  
   const campaignData: any = {
     organization_id: organizationId,
     name: data.name,
-    slug: data.slug || null,
+    slug: slugValue,
     status: data.status,
     campaign_pillar: data.campaignPillar,
     objective: data.mainGoal,
@@ -308,6 +314,18 @@ export async function createCampaign(
     campaignData.end_date = data.endDate
   }
 
+  console.log('[REPO] campaignData before insert:', campaignData)
+  console.log('[REPO] campaignData.slug before insert:', campaignData.slug)
+  
+  // Check for existing campaigns with same organization
+  const { data: existingCampaigns, error: checkError } = await supabase
+    .from('content_campaigns')
+    .select('id, name, slug')
+    .eq('organization_id', organizationId)
+  
+  console.log('[REPO] Existing campaigns:', existingCampaigns)
+  console.log('[REPO] Check error:', checkError)
+  
   const { data: campaign, error } = await supabase
     .from('content_campaigns')
     .insert(campaignData)
@@ -315,6 +333,7 @@ export async function createCampaign(
     .single()
 
   if (error) {
+    console.error('[DB ERROR] Campaign insert failed:', error.message, error.details)
     return null
   }
 
