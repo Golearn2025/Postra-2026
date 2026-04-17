@@ -38,7 +38,8 @@ export const STATUS_LABELS: Record<string, string> = {
   active: 'Active',
   paused: 'Paused',
   completed: 'Completed',
-  archived: 'Archived'
+  archived: 'Archived',
+  expired: 'Expired'
 }
 
 // Schedule Type Labels
@@ -90,16 +91,40 @@ export function getTextOrNotSet(value: string | null | undefined): string {
 export function getStatusVariant(status: string | null | undefined): 'default' | 'secondary' | 'destructive' | 'outline' {
   switch (status) {
     case 'active':
-      return 'default'
+      return 'default' // Green - active campaigns
     case 'draft':
-      return 'secondary'
+      return 'secondary' // Gray - draft campaigns
     case 'paused':
-      return 'outline'
+      return 'outline' // Yellow/Orange border - paused campaigns
     case 'completed':
-      return 'default'
+      return 'default' // Blue - completed campaigns
     case 'archived':
-      return 'secondary'
+      return 'secondary' // Gray - archived campaigns
+    case 'expired':
+      return 'destructive' // Red - expired campaigns
     default:
       return 'secondary'
+  }
+}
+
+/**
+ * Get custom status badge styling for better color differentiation
+ */
+export function getStatusBadgeStyle(status: string | null | undefined) {
+  switch (status) {
+    case 'active':
+      return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200'
+    case 'draft':
+      return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200'
+    case 'paused':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200'
+    case 'completed':
+      return 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200'
+    case 'archived':
+      return 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200'
+    case 'expired':
+      return 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200'
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200'
   }
 }

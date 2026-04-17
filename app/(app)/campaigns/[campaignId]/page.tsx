@@ -1,18 +1,12 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { ArrowLeft, Edit } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { PageHeader } from '@/components/shared/PageHeader'
-import { CampaignStatusBadge } from '@/features/campaigns/components/CampaignStatusBadge'
 import { getCurrentUser } from '@/server/services/auth.service'
 import { getCurrentOrganizationContext } from '@/server/services/organization.service'
 import { getCampaignDetailById } from '@/server/repositories/campaigns.repository'
 import { getSupabaseServerClient } from '@/server/supabase/server'
 import { appConfig } from '@/config/app-config'
-import { CampaignDetailContent } from '@/features/campaigns/components/detail/CampaignDetailContent'
-import { formatDate } from '@/lib/formatters/date'
+import { CampaignViewEdit } from '@/features/campaigns/components/detail/CampaignViewEdit'
 import { withRouteInstrumentation } from '@/server/lib/observability/route-instrumentation'
 
 export const metadata: Metadata = { title: 'Campaign' }
@@ -43,37 +37,10 @@ export default async function CampaignDetailPage({ params }: CampaignDetailPageP
       if (!campaign) notFound()
 
       return (
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/campaigns"
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Campaigns
-            </Link>
-          </div>
-
-          <PageHeader
-            title={campaign.name || 'Untitled Campaign'}
-            description={`Last updated ${formatDate(campaign.updated_at || '')}`}
-            actions={
-              <div className="flex items-center gap-3">
-                <CampaignStatusBadge status={campaign.status} />
-                <Link href={`/campaigns/${campaign.id}/edit`}>
-                  <Button size="sm">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Campaign
-                  </Button>
-                </Link>
-              </div>
-            }
-          />
-
-          <div className="mx-auto max-w-5xl">
-            <CampaignDetailContent campaign={campaign} />
-          </div>
-        </div>
+        <CampaignViewEdit
+          campaign={campaign}
+          organizationName={orgContext!.organization.name}
+        />
       )
     }
   )

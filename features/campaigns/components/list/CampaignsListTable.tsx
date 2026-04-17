@@ -4,14 +4,19 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, Edit2, Archive, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
 import { formatDate } from '@/lib/formatters/date'
 import type { AppCampaignsListItem } from '@/types/views'
-import { archiveCampaignAction, deleteCampaignAction } from '@/server/actions/campaigns'
+import { archiveCampaignAction, deleteCampaignAction, toggleCampaignStatusAction } from '@/server/actions/campaigns'
 import { PremiumTable } from '@/components/premium-table/PremiumTable'
 import { 
   getPillarLabel, 
   getStatusLabel, 
-  getStatusVariant 
+  getStatusVariant,
+  getStatusBadgeStyle 
 } from '@/features/campaigns/utils/campaign-labels'
 
 interface CampaignsListTableProps {
@@ -19,8 +24,80 @@ interface CampaignsListTableProps {
 }
 
 export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
+  console.log('CampaignsListTable rendered with campaigns:', campaigns.length)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set())
+  const [showBulkActions, setShowBulkActions] = useState(false)
+
+  const handleSelectRow = (campaignId: string, checked: boolean) => {
+    console.log('Campaign selected:', campaignId, checked)
+    const newSelected = new Set(selectedRows)
+    if (checked) {
+      newSelected.add(campaignId)
+    } else {
+      newSelected.delete(campaignId)
+    }
+    setSelectedRows(newSelected)
+    setShowBulkActions(newSelected.size > 0)
+  }
+
+  const handleSelectAll = (checked: boolean) => {
+    console.log('Select all clicked:', checked)
+    if (checked) {
+      const allCampaignIds = new Set(campaigns.map(c => c.id))
+      setSelectedRows(allCampaignIds)
+      setShowBulkActions(true)
+    } else {
+      setSelectedRows(new Set())
+      setShowBulkActions(false)
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (selectedRows.size === 0) return
+    
+    const confirmed = confirm(`Delete ${selectedRows.size} campaign${selectedRows.size === 1 ? '' : 's'} permanently?`)
+    if (!confirmed) return
+
+    startTransition(async () => {
+      for (const campaignId of selectedRows) {
+        await deleteCampaignAction(campaignId)
+      }
+      setSelectedRows(new Set())
+      setShowBulkActions(false)
+      router.refresh()
+    })
+  }
+
+  const handleToggleCampaignStatus = async (campaign: AppCampaignsListItem) => {
+    let newStatus: 'active' | 'paused' | 'draft'
+    
+    if (campaign.status === 'draft') {
+      newStatus = 'active'
+    } else if (campaign.status === 'active') {
+      newStatus = 'paused'
+    } else if (campaign.status === 'paused') {
+      newStatus = 'active'
+    } else {
+      // For completed, archived, or expired, don't allow toggle
+      return
+    }
+    
+    const action = newStatus === 'active' ? 'activate' : 'pause'
+    
+    const confirmed = confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} campaign "${campaign.name}"?`)
+    if (!confirmed) return
+
+    startTransition(async () => {
+      const result = await toggleCampaignStatusAction(campaign.id, newStatus)
+      if (result.error) {
+        alert(result.error)
+        return
+      }
+      router.refresh()
+    })
+  }
 
   const formatSchedule = (campaign: AppCampaignsListItem): string => {
     if (campaign.schedule_type === 'date_range' && campaign.start_date && campaign.end_date) {
@@ -78,6 +155,34 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
 
   const columns = [
     {
+      key: 'select' as keyof AppCampaignsListItem,
+      header: () => (
+        <Checkbox
+          checked={selectedRows.size === campaigns.length && campaigns.length > 0}
+          onCheckedChange={handleSelectAll}
+        />
+      ),
+      width: '25px',
+      headerClassName: 'px-2',
+      className: 'px-2',
+      render: (value: any, campaign: AppCampaignsListItem) => (
+        <Checkbox
+          checked={selectedRows.has(campaign.id)}
+          onCheckedChange={(checked) => handleSelectRow(campaign.id, checked as boolean)}
+        />
+      )
+    },
+    {
+      key: 'index' as keyof AppCampaignsListItem,
+      header: 'No.',
+      width: '25px',
+      headerClassName: 'px-2',
+      className: 'px-2',
+      render: (value: any, campaign: AppCampaignsListItem, index: number) => (
+        <span className="text-sm font-medium">{index + 1}.</span>
+      )
+    },
+    {
       key: 'name' as keyof AppCampaignsListItem,
       header: 'Campaign Name',
       width: '200px',
@@ -90,7 +195,10 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
       header: 'Status',
       width: '120px',
       render: (value: any, campaign: AppCampaignsListItem) => (
-        <Badge variant={getStatusVariant(campaign.status)}>
+        <Badge 
+          variant={getStatusVariant(campaign.status)}
+          className={getStatusBadgeStyle(campaign.status)}
+        >
           {getStatusLabel(campaign.status)}
         </Badge>
       )
@@ -114,12 +222,59 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
       )
     },
     {
-      key: 'schedule_type' as keyof AppCampaignsListItem,
-      header: 'Schedule',
-      width: '280px',
-      render: (value: any, campaign: AppCampaignsListItem) => (
-        <div className="text-sm font-medium">{formatSchedule(campaign)}</div>
-      )
+      key: 'start_date' as keyof AppCampaignsListItem,
+      header: 'Start Date',
+      width: '120px',
+      render: (value: any, campaign: AppCampaignsListItem) => {
+        if (campaign.schedule_type === 'date_range' && campaign.start_date) {
+          return (
+            <div className="text-sm font-medium text-green-700 bg-green-50 px-2 py-1 rounded">
+              {formatDate(campaign.start_date)}
+            </div>
+          )
+        }
+        return <span className="text-sm text-muted-foreground">-</span>
+      }
+    },
+    {
+      key: 'end_date' as keyof AppCampaignsListItem,
+      header: 'End Date',
+      width: '120px',
+      render: (value: any, campaign: AppCampaignsListItem) => {
+        if (campaign.schedule_type === 'date_range' && campaign.end_date) {
+          return (
+            <div className="text-sm font-medium text-red-700 bg-red-50 px-2 py-1 rounded">
+              {formatDate(campaign.end_date)}
+            </div>
+          )
+        }
+        return <span className="text-sm text-muted-foreground">-</span>
+      }
+    },
+    {
+      key: 'days' as keyof AppCampaignsListItem,
+      header: 'Days',
+      width: '80px',
+      render: (value: any, campaign: AppCampaignsListItem) => {
+        if (campaign.schedule_type === 'date_range') {
+          return (
+            <span className="text-sm font-medium">
+              {campaign.campaign_duration_days || '-'}d
+            </span>
+          )
+        }
+        
+        if (campaign.schedule_type === 'selected_dates') {
+          const count = campaign.selected_dates_count || 0
+          return (
+            <span className="text-sm font-medium">
+              {count} day{count !== 1 ? 's' : ''}
+            </span>
+          )
+        }
+        
+        return <span className="text-sm text-muted-foreground">-</span>
+      }
     },
     {
       key: 'created_at' as keyof AppCampaignsListItem,
@@ -132,6 +287,21 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
       header: 'Updated',
       width: '140px',
       render: (value: any, campaign: AppCampaignsListItem) => formatDateTime(campaign.updated_at)
+    },
+    {
+      key: 'toggle' as keyof AppCampaignsListItem,
+      header: 'Active',
+      width: '80px',
+      render: (value: any, campaign: AppCampaignsListItem) => (
+        <div className="flex items-center justify-center">
+          <Switch
+            checked={campaign.status === 'active'}
+            onCheckedChange={() => handleToggleCampaignStatus(campaign)}
+            disabled={isPending || ['completed', 'archived', 'expired'].includes(campaign.status)}
+            className="data-[state=checked]:bg-green-500"
+          />
+        </div>
+      )
     }
   ]
 
@@ -164,15 +334,47 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
   ]
 
   return (
-    <PremiumTable
-      data={campaigns}
-      columns={columns}
-      actions={actions}
-      showZebraStriping={true}
-      hoverEffect={true}
-      compact={false}
-      emptyMessage="No campaigns found"
-      className="shadow-lg border-slate-200 dark:border-slate-700"
-    />
+    <div className="space-y-4">
+      {/* Bulk Actions Bar */}
+      {showBulkActions && (
+        <Card className="p-4 border-blue-200 bg-blue-50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">
+                {selectedRows.size} campaign{selectedRows.size !== 1 ? 's' : ''} selected
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteSelected}
+                disabled={selectedRows.size === 0 || isPending}
+              >
+                Delete Selected
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSelectAll(false)}
+              >
+                Clear Selection
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      <PremiumTable
+        data={campaigns}
+        columns={columns}
+        actions={actions}
+        showZebraStriping={true}
+        hoverEffect={true}
+        compact={false}
+        emptyMessage="No campaigns found"
+        className="shadow-lg border-slate-200 dark:border-slate-700"
+      />
+    </div>
   )
 }

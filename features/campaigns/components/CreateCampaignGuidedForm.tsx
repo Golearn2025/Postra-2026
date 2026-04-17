@@ -39,13 +39,15 @@ export function CreateCampaignGuidedForm({
         })
       })
 
+      const result = await response.json()
+      
       if (!response.ok) {
-        throw new Error('Failed to create campaign')
+        throw new Error(result.error || 'Failed to create campaign')
       }
 
       router.push('/campaigns')
     } catch (error) {
-      console.error('Failed to create campaign:', error)
+      console.error('[CAMPAIGN CREATE]', error)
       throw error
     }
   }

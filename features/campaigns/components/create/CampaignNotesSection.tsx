@@ -2,6 +2,7 @@
 
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils/cn'
 import type { CreateCampaignFormData } from '@/types/campaigns'
 
 interface CampaignNotesSectionProps {
@@ -17,29 +18,36 @@ export function CampaignNotesSection({
 }: CampaignNotesSectionProps) {
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold mb-1">Additional Notes</h2>
+      {/* Section Header - Compact */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-5 rounded-full bg-gradient-to-b from-[#6366f1] to-[#4f46e5]"></div>
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Additional Notes</h2>
+        </div>
         <p className="text-sm text-muted-foreground">
-          Add any extra details or context for your campaign
+          Add extra details or context for your campaign.
         </p>
       </div>
 
-      {/* Campaign Description */}
-      <div className="space-y-2">
-        <Label htmlFor="description">Campaign Description (Optional)</Label>
+      {/* Campaign Description - Compact */}
+      <div className="space-y-3">
+        <Label htmlFor="description" className="text-sm font-semibold">Campaign Description</Label>
         <Textarea
           id="description"
           placeholder="Provide additional context, goals, or details about this campaign..."
           value={formData.description}
           onChange={(e) => onChange('description', e.target.value)}
-          rows={4}
-          className={errors.description ? 'border-destructive' : ''}
+          rows={6}
+          className={cn(
+            "text-sm resize-none",
+            errors.description && 'border-destructive'
+          )}
         />
-        <p className="text-sm text-muted-foreground">
-          Describe the campaign's purpose, key messages, or any important context
+        <p className="text-xs text-muted-foreground">
+          Describe the campaign's purpose, key messages, or important context
         </p>
         {errors.description && (
-          <p className="text-sm text-destructive">{errors.description}</p>
+          <p className="text-xs text-destructive">{errors.description}</p>
         )}
       </div>
     </div>

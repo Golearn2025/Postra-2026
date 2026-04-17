@@ -1,18 +1,18 @@
 'use client'
 
 import React from 'react'
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils/cn'
-import { Megaphone, Users, Calendar, StickyNote } from 'lucide-react'
-import { CampaignFormHeader } from './CampaignFormHeader'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CampaignPremiumHeader } from './CampaignPremiumHeader'
+import { CampaignSidebar } from './CampaignSidebar'
+import { CampaignDebugPanel } from './CampaignDebugPanel'
 import { CampaignWhatSection } from './CampaignWhatSection'
 import { CampaignWhoSection } from './CampaignWhoSection'
 import { CampaignWhenSection } from './CampaignWhenSection'
 import { CampaignNotesSection } from './CampaignNotesSection'
-import { CampaignAdvancedSection } from './CampaignAdvancedSection'
 import type { CreateCampaignFormData } from '@/types/campaigns'
 
 interface CampaignFormRootProps {
@@ -34,13 +34,9 @@ export function CampaignFormRoot({
   const [currentSection, setCurrentSection] = useState('basics')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [completedSections, setCompletedSections] = useState<string[]>([])
 
-  const sections = [
-    { id: 'basics', label: 'What', icon: Megaphone },
-    { id: 'target', label: 'Who', icon: Users },
-    { id: 'schedule', label: 'When', icon: Calendar },
-    { id: 'notes', label: 'Notes', icon: StickyNote }
-  ]
+  const sections = ['basics', 'target', 'schedule', 'notes']
 
   const handleCancel = () => {
     if (onCancel) {
@@ -50,25 +46,18 @@ export function CampaignFormRoot({
     }
   }
 
-  const sectionRefs = {
-    basics: useRef<HTMLDivElement>(null),
-    target: useRef<HTMLDivElement>(null),
-    schedule: useRef<HTMLDivElement>(null),
-    notes: useRef<HTMLDivElement>(null)
-  }
-
   const [formData, setFormData] = useState<CreateCampaignFormData>({
     name: initialData?.name || '',
-    campaignPillar: initialData?.campaignPillar || undefined,
-    mainGoal: initialData?.mainGoal || undefined,
-    targetAudience: initialData?.targetAudience || undefined,
-    targetMarket: initialData?.targetMarket || '',
+    campaignPillar: initialData?.campaignPillar,
+    mainGoal: initialData?.mainGoal,
+    targetAudience: initialData?.targetAudience,
+    targetMarket: initialData?.targetMarket,
     scheduleType: initialData?.scheduleType || 'date_range',
-    startDate: initialData?.startDate || '',
-    endDate: initialData?.endDate || '',
-    selectedDates: initialData?.selectedDates || [],
-    description: initialData?.description || '',
-    slug: initialData?.slug || '',
+    startDate: initialData?.startDate,
+    endDate: initialData?.endDate,
+    selectedDates: initialData?.selectedDates,
+    description: initialData?.description,
+    slug: initialData?.slug,
     status: initialData?.status || 'draft'
   })
 
@@ -87,36 +76,30 @@ export function CampaignFormRoot({
       const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       setFormData(prev => ({ ...prev, slug }))
     }
-  }
 
-  const scrollToSection = (sectionId: string) => {
-    const ref = sectionRefs[sectionId as keyof typeof sectionRefs]
-    if (ref.current) {
-      ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      setCurrentSection(sectionId)
+    // Mark section as touched/completed
+    if (value && !completedSections.includes(currentSection)) {
+      setCompletedSections(prev => [...prev, currentSection])
     }
   }
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setCurrentSection(entry.target.id)
-          }
-        })
-      },
-      { threshold: 0.5 }
-    )
+  const handleSectionChange = (sectionId: string) => {
+    setCurrentSection(sectionId)
+  }
 
-    Object.values(sectionRefs).forEach((ref) => {
-      if (ref.current) {
-        observer.observe(ref.current)
-      }
-    })
+  const handleNext = () => {
+    const currentIndex = sections.indexOf(currentSection)
+    if (currentIndex < sections.length - 1) {
+      setCurrentSection(sections[currentIndex + 1])
+    }
+  }
 
-    return () => observer.disconnect()
-  }, [])
+  const handlePrevious = () => {
+    const currentIndex = sections.indexOf(currentSection)
+    if (currentIndex > 0) {
+      setCurrentSection(sections[currentIndex - 1])
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -126,143 +109,155 @@ export function CampaignFormRoot({
     try {
       await onSubmit(formData)
     } catch (error) {
-      console.error('Form submission error:', error)
+      console.error('[SUBMIT ERROR]', error)
       setErrors({ general: 'Failed to create campaign. Please try again.' })
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const progress = (completedSections.length / sections.length) * 100
+
+  const currentIndex = sections.indexOf(currentSection)
+
   return (
-    <div>
-      {/* ONE UNIFIED PREMIUM HEADER */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 border-b border-border/50 shadow-sm">
-        <div className="container max-w-4xl mx-auto px-4 py-6">
-          {/* Title + Organization */}
-          <div className="text-center space-y-3 mb-6">
-            <div className="flex items-center justify-center gap-3">
-              <div className="w-2 h-8 rounded-full bg-gradient-to-b from-accent to-accent/60"></div>
-              <h1 className="text-3xl font-bold tracking-tight">Create New Campaign</h1>
-              <div className="w-2 h-8 rounded-full bg-gradient-to-b from-accent to-accent/60"></div>
+    <div className="h-full flex flex-col">
+      {/* Premium Fixed Header */}
+      <form onSubmit={handleSubmit} className="h-full flex flex-col">
+        <CampaignPremiumHeader
+          organizationName={organizationName}
+          isSubmitting={isSubmitting}
+          onCancel={handleCancel}
+        />
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Sidebar */}
+          <CampaignSidebar
+            currentSection={currentSection}
+            completedSections={completedSections}
+            onSectionChange={handleSectionChange}
+            progress={progress}
+          />
+
+          {/* Content Area */}
+          <div className="flex-1 flex flex-col overflow-hidden bg-canvas-bg">
+            {/* Error Message */}
+            {errors.general && (
+              <div className="mx-8 mt-8 bg-red-50 dark:bg-red-950/20 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 p-5 rounded-xl shadow-sm">
+                <strong className="font-semibold">Error:</strong> {errors.general}
+              </div>
+            )}
+
+            {/* Section Content */}
+            <div className="flex-1 overflow-y-auto px-8 py-8">
+              <div className="max-w-5xl mx-auto">
+                {/* Section Slides */}
+                <div className="relative">
+                  {/* What Section */}
+                  <div className={cn(
+                    "transition-all duration-300",
+                    currentSection === 'basics' ? 'block' : 'hidden'
+                  )}>
+                    <CampaignWhatSection
+                      formData={formData}
+                      onChange={handleChange}
+                      errors={errors}
+                    />
+                  </div>
+
+                  {/* Who Section */}
+                  <div className={cn(
+                    "transition-all duration-300",
+                    currentSection === 'target' ? 'block' : 'hidden'
+                  )}>
+                    <CampaignWhoSection
+                      formData={formData}
+                      onChange={handleChange}
+                      errors={errors}
+                    />
+                  </div>
+
+                  {/* When Section */}
+                  <div className={cn(
+                    "transition-all duration-300",
+                    currentSection === 'schedule' ? 'block' : 'hidden'
+                  )}>
+                    <CampaignWhenSection
+                      formData={formData}
+                      onChange={handleChange}
+                      errors={errors}
+                    />
+                  </div>
+
+                  {/* Notes Section */}
+                  <div className={cn(
+                    "transition-all duration-300",
+                    currentSection === 'notes' ? 'block' : 'hidden'
+                  )}>
+                    <CampaignNotesSection
+                      formData={formData}
+                      onChange={handleChange}
+                      errors={errors}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-sm text-muted-foreground">Creating campaign for</span>
-              <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-gradient-to-r from-accent/10 to-accent/5 text-accent border border-accent/20 shadow-sm">
-                <div className="w-2 h-2 rounded-full bg-accent mr-2"></div>
-                {organizationName}
+
+            {/* Bottom Navigation */}
+            <div className="flex-shrink-0 border-t border-border bg-white dark:bg-slate-900 px-8 py-6">
+              <div className="max-w-5xl mx-auto flex items-center justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handlePrevious}
+                  disabled={currentIndex === 0}
+                  className="gap-2 h-11 px-6 border-slate-300 dark:border-slate-600"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                  <span className="font-semibold">Previous</span>
+                </Button>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-muted-foreground font-medium">
+                    Step {currentIndex + 1} of {sections.length}
+                  </span>
+                  <div className="flex gap-1.5">
+                    {sections.map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "w-2 h-2 rounded-full transition-all duration-200",
+                          idx === currentIndex && "w-8 bg-gradient-to-r from-[#6366f1] to-[#4f46e5]",
+                          idx < currentIndex && "bg-green-500",
+                          idx > currentIndex && "bg-slate-300 dark:bg-slate-600"
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {currentIndex < sections.length - 1 ? (
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    className="gap-2 h-11 px-6 bg-gradient-to-r from-[#6366f1] to-[#4f46e5] hover:from-[#4f46e5] hover:to-[#4338ca] text-white shadow-lg shadow-[#6366f1]/25"
+                  >
+                    <span className="font-semibold">Next</span>
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+                ) : (
+                  <div className="w-32" />
+                )}
               </div>
             </div>
           </div>
-
-          {/* Steps with Icons */}
-          <div className="flex items-center justify-center gap-2 mb-4">
-            {sections.map((section, index) => {
-              const Icon = section.icon
-              const isActive = currentSection === section.id
-              const isCompleted = index < sections.findIndex(s => s.id === currentSection)
-              
-              return (
-                <React.Fragment key={section.id}>
-                  <button
-                    type="button"
-                    onClick={() => scrollToSection(section.id)}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                      isActive && "bg-accent text-white shadow-sm",
-                      isCompleted && "bg-accent/10 text-accent hover:bg-accent/20",
-                      !isActive && !isCompleted && "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{section.label}</span>
-                  </button>
-                  {index < sections.length - 1 && (
-                    <div className={cn(
-                      "w-8 h-0.5",
-                      index < sections.findIndex(s => s.id === currentSection) ? "bg-accent" : "bg-muted"
-                    )} />
-                  )}
-                </React.Fragment>
-              )
-            })}
-          </div>
-
-          {/* Cancel Button */}
-          <div className="text-center">
-            <Button 
-              type="button"
-              variant="outline" 
-              onClick={handleCancel}
-              className="border-border/50 hover:bg-muted/50 transition-all duration-200"
-            >
-              Cancel
-            </Button>
-          </div>
         </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="container max-w-4xl mx-auto px-4 py-8 space-y-12">
-        {errors.general && (
-          <div className="bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-md">
-            {errors.general}
-          </div>
-        )}
-
-      {/* Section 1: Campaign Basics */}
-      <section id="basics" ref={sectionRefs.basics}>
-        <Card className="p-6">
-          <CampaignWhatSection
-            formData={formData}
-            onChange={handleChange}
-            errors={errors}
-          />
-        </Card>
-      </section>
-
-      {/* Section 2: Target Audience */}
-      <section id="target" ref={sectionRefs.target}>
-        <Card className="p-6">
-          <CampaignWhoSection
-            formData={formData}
-            onChange={handleChange}
-            errors={errors}
-          />
-        </Card>
-      </section>
-
-      {/* Section 3: Schedule */}
-      <section id="schedule" ref={sectionRefs.schedule}>
-        <Card className="p-6">
-          <CampaignWhenSection
-            formData={formData}
-            onChange={handleChange}
-            errors={errors}
-          />
-        </Card>
-      </section>
-
-      {/* Section 4: Notes */}
-      <section id="notes" ref={sectionRefs.notes}>
-        <Card className="p-6">
-          <CampaignNotesSection
-            formData={formData}
-            onChange={handleChange}
-            errors={errors}
-          />
-        </Card>
-      </section>
-
-      {/* Advanced Section */}
-      <Card className="p-6">
-        <CampaignAdvancedSection
-          formData={formData}
-          onChange={handleChange}
-          errors={errors}
-          isSubmitting={isSubmitting}
-          onCancel={onCancel}
-        />
-      </Card>
       </form>
+
+      {/* Debug Panel - Remove in production */}
+      <CampaignDebugPanel formData={formData} />
     </div>
   )
 }

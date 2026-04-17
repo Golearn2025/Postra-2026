@@ -3,7 +3,7 @@
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Megaphone, Lightbulb, Heart, BookOpen, Calendar, Users } from 'lucide-react'
+import { Megaphone, Lightbulb, Heart, BookOpen, Calendar, Users, TrendingUp, MessageCircle, UserPlus, Tag, CalendarCheck } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { CAMPAIGN_PILLAR_OPTIONS, CAMPAIGN_GOAL_OPTIONS } from '../../constants/campaign-options'
 import type { CreateCampaignFormData } from '@/types/campaigns'
@@ -23,28 +23,36 @@ const pillarIcons = {
   brand_story: Users
 } as const
 
+const goalIcons = {
+  brand_awareness: TrendingUp,
+  drive_engagement: MessageCircle,
+  generate_leads: UserPlus,
+  promote_offer: Tag,
+  drive_bookings: CalendarCheck
+} as const
+
 export function CampaignWhatSection({
   formData,
   onChange,
   errors
 }: CampaignWhatSectionProps) {
   return (
-    <div className="space-y-8">
-      {/* Premium Section Header */}
-      <div className="space-y-3">
+    <div className="space-y-6">
+      {/* Premium Section Header - Compact */}
+      <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-6 rounded-full bg-gradient-to-b from-accent to-accent/60"></div>
-          <h2 className="text-2xl font-bold tracking-tight">What are you creating?</h2>
+          <div className="w-1 h-5 rounded-full bg-gradient-to-b from-[#6366f1] to-[#4f46e5]"></div>
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">What are you creating?</h2>
         </div>
-        <p className="text-muted-foreground leading-relaxed max-w-2xl">
-          Start with a clear name and define the main content direction for your campaign. This will help guide all your content decisions.
+        <p className="text-sm text-muted-foreground">
+          Define your campaign name and core focus.
         </p>
       </div>
 
-      {/* Premium Campaign Name */}
-      <div className="space-y-3">
+      {/* Campaign Name - Full Width */}
+      <div className="space-y-2">
         <Label htmlFor="campaignName" className="text-sm font-semibold text-foreground">
-          Campaign Name <span className="text-accent">*</span>
+          Campaign Name <span className="text-[#6366f1]">*</span>
         </Label>
         <Input
           id="campaignName"
@@ -53,8 +61,8 @@ export function CampaignWhatSection({
           value={formData.name}
           onChange={(e) => onChange('name', e.target.value)}
           className={cn(
-            "h-12 text-base border-border/50 focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-all duration-200",
-            errors.name && "border-destructive focus:border-destructive/50 focus:ring-destructive/10"
+            "h-11 text-sm border-border focus:border-[#6366f1]/50 focus:ring-2 focus:ring-[#6366f1]/10",
+            errors.name && "border-destructive focus:border-destructive/50"
           )}
         />
         {errors.name && (
@@ -62,73 +70,99 @@ export function CampaignWhatSection({
         )}
       </div>
 
-      {/* Campaign Pillar */}
-      <div className="space-y-3">
-        <Label>Campaign Pillar *</Label>
-        <p className="text-sm text-muted-foreground">
-          What is the main focus of this campaign?
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {CAMPAIGN_PILLAR_OPTIONS.map((option) => {
-            const Icon = pillarIcons[option.value as keyof typeof pillarIcons]
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => onChange('campaignPillar', option.value)}
-                className={`
-                  p-4 rounded-lg border-2 transition-all text-left
-                  ${formData.campaignPillar === option.value
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                  }
-                `}
-              >
-                <div className="flex items-start gap-3">
-                  <Icon className="h-5 w-5 mt-0.5 text-primary" />
-                  <div className="space-y-1">
-                    <h3 className="font-medium">{option.label}</h3>
-                    <p className="text-sm text-muted-foreground">{option.description}</p>
+      {/* Two Column Layout for Pillar & Goal */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Campaign Pillar - Left Column */}
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">Campaign Pillar <span className="text-[#6366f1]">*</span></Label>
+          <p className="text-xs text-muted-foreground">
+            Select your campaign focus
+          </p>
+          
+          <div className="grid grid-cols-1 gap-2">
+            {CAMPAIGN_PILLAR_OPTIONS.map((option) => {
+              const Icon = pillarIcons[option.value as keyof typeof pillarIcons]
+              const isSelected = formData.campaignPillar === option.value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => onChange('campaignPillar', option.value)}
+                  className={cn(
+                    "p-3 rounded-lg border-2 transition-all text-left group",
+                    isSelected
+                      ? 'border-[#6366f1] bg-[#eef2ff] dark:bg-[#6366f1]/10'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-[#6366f1]/50'
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
+                      isSelected 
+                        ? "bg-gradient-to-br from-[#6366f1] to-[#4f46e5] text-white"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-[#6366f1]/10"
+                    )}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <span className={cn(
+                      "text-sm font-medium",
+                      isSelected && "text-[#6366f1]"
+                    )}>{option.label}</span>
                   </div>
-                </div>
-              </button>
-            )
-          })}
+                </button>
+              )
+            })}
+          </div>
+          {errors.campaignPillar && (
+            <p className="text-xs text-destructive">{errors.campaignPillar}</p>
+          )}
         </div>
-        {errors.campaignPillar && (
-          <p className="text-sm text-destructive">{errors.campaignPillar}</p>
-        )}
-      </div>
 
-      {/* Main Goal */}
-      <div className="space-y-3">
-        <Label>Main Goal</Label>
-        <p className="text-sm text-muted-foreground">
-          What specific outcome do you want to achieve?
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {CAMPAIGN_GOAL_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => onChange('mainGoal', option.value)}
-              className={`
-                p-3 rounded-lg border-2 transition-all text-left
-                ${formData.mainGoal === option.value
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50'
-                }
-              `}
-            >
-              <div className="font-medium">{option.label}</div>
-            </button>
-          ))}
+        {/* Main Goal - Right Column */}
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">Main Goal <span className="text-[#6366f1]">*</span></Label>
+          <p className="text-xs text-muted-foreground">
+            Choose your primary objective
+          </p>
+          
+          <div className="grid grid-cols-1 gap-2">
+            {CAMPAIGN_GOAL_OPTIONS.map((option) => {
+              const Icon = goalIcons[option.value as keyof typeof goalIcons]
+              const isSelected = formData.mainGoal === option.value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => onChange('mainGoal', option.value)}
+                  className={cn(
+                    "p-3 rounded-lg border-2 transition-all text-left group",
+                    isSelected
+                      ? 'border-[#6366f1] bg-[#eef2ff] dark:bg-[#6366f1]/10'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-[#6366f1]/50'
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
+                      isSelected 
+                        ? "bg-gradient-to-br from-[#6366f1] to-[#4f46e5] text-white"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-[#6366f1]/10"
+                    )}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <span className={cn(
+                      "text-sm font-medium",
+                      isSelected && "text-[#6366f1]"
+                    )}>{option.label}</span>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+          {errors.mainGoal && (
+            <p className="text-xs text-destructive">{errors.mainGoal}</p>
+          )}
         </div>
-        {errors.mainGoal && (
-          <p className="text-sm text-destructive">{errors.mainGoal}</p>
-        )}
       </div>
     </div>
   )

@@ -292,7 +292,7 @@ export async function createCampaign(
     name: data.name,
     slug: data.slug || null,
     status: data.status,
-    campaign_pillar: data.campaignPillar, // Use only campaign_pillar as required
+    campaign_pillar: data.campaignPillar,
     objective: data.mainGoal,
     target_audience: data.targetAudience,
     target_market: data.targetMarket || null,
@@ -315,12 +315,12 @@ export async function createCampaign(
     .single()
 
   if (error) {
-    console.error('createCampaign error:', error)
+    console.error('[DB ERROR] Campaign insert failed:', error.message, error.details)
     return null
   }
 
   // If selected_dates mode, create campaign date rows
-  if (data.scheduleType === 'selected_dates' && data.selectedDates) {
+  if (data.scheduleType === 'selected_dates' && data.selectedDates && data.selectedDates.length > 0) {
     const campaignDates = data.selectedDates.map(date => ({
       organization_id: organizationId,
       campaign_id: campaign.id,
@@ -334,7 +334,7 @@ export async function createCampaign(
       .insert(campaignDates)
 
     if (datesError) {
-      console.error('createCampaignDates error:', datesError)
+      console.error('[DB ERROR] Campaign dates insert failed:', datesError.message)
       // Rollback campaign creation
       await supabase
         .from('content_campaigns')

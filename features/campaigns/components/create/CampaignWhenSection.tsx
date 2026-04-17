@@ -34,10 +34,14 @@ export function CampaignWhenSection({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold mb-1">When will this run?</h2>
+      {/* Section Header - Compact */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-5 rounded-full bg-gradient-to-b from-[#6366f1] to-[#4f46e5]"></div>
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">When will this run?</h2>
+        </div>
         <p className="text-sm text-muted-foreground">
-          Set the timing and schedule for your campaign
+          Set the timing and schedule for your campaign.
         </p>
       </div>
 

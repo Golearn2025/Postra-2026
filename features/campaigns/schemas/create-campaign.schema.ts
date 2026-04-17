@@ -46,7 +46,7 @@ export const createCampaignSchema = z.object({
   
   // Advanced
   slug: z.string().optional(),
-  status: z.enum(['draft', 'active', 'paused'] as const, {
+  status: z.enum(['draft', 'active', 'paused', 'completed', 'archived', 'expired'] as const, {
     errorMap: () => ({ message: 'Please choose a campaign status' })
   }),
 }).refine((data) => {

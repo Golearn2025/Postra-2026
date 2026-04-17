@@ -21,6 +21,7 @@ export async function createCampaignAction(
   // Validate input
   const parsed = createCampaignSchema.safeParse(data)
   if (!parsed.success) {
+    console.error('[VALIDATION ERROR]', parsed.error.errors[0]?.message)
     return { error: parsed.error.errors[0]?.message ?? 'Invalid data' }
   }
 
@@ -42,6 +43,7 @@ export async function createCampaignAction(
   )
 
   if (!campaign) {
+    console.error('[DB INSERT FAILED]')
     return { error: 'Failed to create campaign' }
   }
 

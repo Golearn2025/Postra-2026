@@ -30,6 +30,33 @@ export async function archiveCampaignAction(
   return {}
 }
 
+export async function toggleCampaignStatusAction(
+  campaignId: string,
+  newStatus: 'active' | 'paused' | 'draft'
+): Promise<{ error?: string }> {
+  const user = await getCurrentUser()
+  if (!user) return { error: 'Unauthorized' }
+
+  const supabase = await getSupabaseServerClient()
+
+  const { error } = await supabase
+    .from('content_campaigns')
+    .update({
+      status: newStatus,
+      updated_by: user.profile.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', campaignId)
+
+  if (error) {
+    console.error('Toggle campaign status error:', error)
+    return { error: 'Failed to update campaign status. Please try again.' }
+  }
+
+  revalidatePath('/campaigns')
+  return {}
+}
+
 export async function deleteCampaignAction(
   campaignId: string
 ): Promise<{ error?: string }> {

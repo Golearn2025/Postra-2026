@@ -1,4 +1,4 @@
-export type CampaignStatus = 'draft' | 'active' | 'paused' | 'completed' | 'archived'
+export type CampaignStatus = 'draft' | 'active' | 'paused' | 'completed' | 'archived' | 'expired'
 
 export type CampaignPillar = 
   | 'brand_awareness'
@@ -28,22 +28,22 @@ export type ScheduleType = 'date_range' | 'selected_dates'
 export interface CreateCampaignFormData {
   // Basic Setup
   name: string
-  campaignPillar: CampaignPillar | undefined
-  mainGoal: CampaignGoal | undefined
-  targetAudience: TargetAudience | undefined
-  targetMarket: string
+  campaignPillar?: CampaignPillar
+  mainGoal?: CampaignGoal
+  targetAudience?: TargetAudience
+  targetMarket?: string
   
   // Schedule
   scheduleType: ScheduleType
   startDate?: string
   endDate?: string
-  selectedDates: string[]
+  selectedDates?: string[]
   
   // Notes
-  description: string
+  description?: string
   
   // Advanced
-  slug: string
+  slug?: string
   status: CampaignStatus
 }
 

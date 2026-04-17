@@ -9,7 +9,7 @@ import { ReactNode } from 'react'
 
 interface Column<T> {
   key: keyof T
-  header: string
+  header: string | (() => React.ReactNode)
   width?: string
   className?: string
   headerClassName?: string
@@ -88,7 +88,7 @@ export function PremiumTable<T>({
                     column.width && `w-[${column.width}]`
                   )}
                 >
-                  {column.header}
+                  {typeof column.header === 'function' ? column.header() : column.header}
                 </th>
               ))}
               {actions && (
