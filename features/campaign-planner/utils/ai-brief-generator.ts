@@ -22,7 +22,14 @@ export function generateAIBrief(params: AIBriefParams): string {
   // Build explicit day → asset mapping
   const dayMappingLines = dayDates.map((date, i) => {
     const asset = mediaAssets[i]
-    return `  Day ${i + 1} (${date}) → ${asset.filename}${asset.title ? ` [${asset.title}]` : ''}${asset.tags.length > 0 ? ` (tags: ${asset.tags.join(', ')})` : ''}`
+    let mapping = `  Day ${i + 1} (${date}) -> ${asset.filename}`
+    if (asset.title) mapping += ` [${asset.title}]`
+    if (asset.tags?.length) mapping += ` (tags: ${asset.tags.join(', ')})`
+    if (asset.assetTitleShort) mapping += ` (assetTitleShort: ${asset.assetTitleShort})`
+    if (asset.assetDescription) mapping += ` (assetDescription: ${asset.assetDescription})`
+    if (asset.assetTags?.length) mapping += ` (assetTags: ${asset.assetTags.join(', ')})`
+    if (asset.assetAiHint) mapping += ` (assetAiHint: ${asset.assetAiHint})`
+    return mapping
   }).join('\n')
 
   // Build example output using first asset

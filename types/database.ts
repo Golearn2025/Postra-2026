@@ -155,7 +155,10 @@ export interface DbContentCampaign {
   name: string
   slug: string
   status: CampaignStatus
+  campaign_pillar: string | null  // NEW: Primary pillar field
+  // Keep old fields for backward compatibility during transition
   pillar: ContentPillarType | null
+  campaign_pillar_custom: string | null
   objective: string | null
   target_audience: string | null
   target_market: string | null
@@ -220,6 +223,11 @@ export interface DbMediaAsset {
   tags: string[]
   suggested_platforms: string[]
   metadata: Record<string, unknown>
+  // New metadata fields for AI brief generation
+  asset_title_short: string | null
+  asset_description: string | null
+  asset_tags: string[] | null
+  asset_ai_hint: string | null
   // Thumbnail fields for persistent preview support
   thumb_storage_path: string | null
   thumb_file_url: string | null

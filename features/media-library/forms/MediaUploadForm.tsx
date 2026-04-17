@@ -67,6 +67,11 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
       format_group: null,
       campaign_id: null,
       suggested_platforms: [],
+      // New metadata fields
+      asset_title_short: '',
+      asset_description: '',
+      asset_tags: '',
+      asset_ai_hint: '',
     },
   })
 
@@ -87,6 +92,11 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
       format_group: null,
       suggested_platforms: [],
       campaign_id: null,
+      // New metadata fields
+      asset_title_short: file.name.replace(/\.[^/.]+$/, ''),
+      asset_description: '',
+      asset_tags: '',
+      asset_ai_hint: '',
     }))
     setFilesMetadata(initialMetadata)
     setShowReviewTable(selectedFiles.length > 0)
@@ -364,6 +374,38 @@ export function MediaUploadForm({ organizationId }: MediaUploadFormProps) {
         <div className="space-y-1.5">
           <Label htmlFor="description">Description</Label>
           <Textarea id="description" {...register('description')} rows={2} placeholder="Optional notes about this asset..." />
+        </div>
+      )}
+
+      {/* New Metadata Fields - Hidden in bulk mode */}
+      {!showReviewTable && (
+        <div className="space-y-4 border-t pt-4">
+          <h3 className="text-sm font-medium text-foreground">AI Brief Metadata</h3>
+          
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="asset_title_short">Short Title</Label>
+              <Input id="asset_title_short" {...register('asset_title_short')} placeholder="e.g. Hotel Pickup 01" />
+              <p className="text-[11px] text-muted-foreground">Short clean title for UI/library display</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="asset_tags">Asset Tags</Label>
+              <Input id="asset_tags" {...register('asset_tags')} placeholder="hotel, pickup, luxury" />
+              <p className="text-[11px] text-muted-foreground">Tags for AI context (3-5 keywords)</p>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="asset_description">Asset Description</Label>
+            <Textarea id="asset_description" {...register('asset_description')} rows={2} placeholder="Client entering the vehicle outside a luxury hotel in London" />
+            <p className="text-[11px] text-muted-foreground">1 short sentence describing the visual scene</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="asset_ai_hint">AI Hint (Optional)</Label>
+            <Textarea id="asset_ai_hint" {...register('asset_ai_hint')} rows={2} placeholder="Emphasize premium arrival experience and polished first impression" />
+            <p className="text-[11px] text-muted-foreground">Optional short creative angle or intended message for AI generation</p>
+          </div>
         </div>
       )}
 

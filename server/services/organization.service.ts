@@ -3,6 +3,7 @@ import { getAvailableOrganizationsForCurrentUser, getOrganizationBySlug, getMemb
 import { getCurrentProfile } from '@/server/repositories/profiles.repository'
 import type { AppUser } from '@/types/app'
 import type { OrganizationSwitcherItem, OrgContext } from '@/types/organizations'
+import { performanceMonitor } from '@/server/lib/observability/performance'
 
 export async function getAvailableOrganizations(user: AppUser): Promise<OrganizationSwitcherItem[]> {
   const supabase = await getSupabaseServerClient()
@@ -13,43 +14,52 @@ export async function getCurrentOrganizationContext(
   user: AppUser,
   selectedSlug?: string
 ): Promise<OrgContext | null> {
-  const supabase = await getSupabaseServerClient()
-  
-  // Get available organizations for this user
-  const availableOrgs = await getAvailableOrganizations(user)
-  if (availableOrgs.length === 0) return null
+  return performanceMonitor.measureAsync(
+    {
+      scope: 'organization_context',
+      functionName: 'getCurrentOrganizationContext',
+      userId: user.profile.id
+    },
+    async () => {
+      const supabase = await getSupabaseServerClient()
+      
+      // Get available organizations for this user
+      const availableOrgs = await getAvailableOrganizations(user)
+      if (availableOrgs.length === 0) return null
 
-  // Determine which org to use
-  let targetOrg: OrganizationSwitcherItem | null = null
-  
-  if (selectedSlug) {
-    // Try to use the selected slug
-    targetOrg = availableOrgs.find(org => org.slug === selectedSlug) ?? null
-  }
-  
-  if (!targetOrg) {
-    // Fall back to first available organization
-    targetOrg = availableOrgs[0]
-  }
+      // Determine which org to use
+      let targetOrg: OrganizationSwitcherItem | null = null
+      
+      if (selectedSlug) {
+        // Try to use the selected slug
+        targetOrg = availableOrgs.find(org => org.slug === selectedSlug) ?? null
+      }
+      
+      if (!targetOrg) {
+        // Fall back to first available organization
+        targetOrg = availableOrgs[0]
+      }
 
-  // Get full organization details
-  const orgDetails = await getOrganizationBySlug(supabase, targetOrg.slug)
-  if (!orgDetails) return null
+      // Get full organization details
+      const orgDetails = await getOrganizationBySlug(supabase, targetOrg.slug)
+      if (!orgDetails) return null
 
-  // Get member role (for non-owners) - parallel execution possible here
-  const memberRole = user.isPlatformOwner 
-    ? null 
-    : await getMemberRole(supabase, orgDetails.id, user.profile.id)
+      // Get member role (for non-owners) - parallel execution possible here
+      const memberRole = user.isPlatformOwner 
+        ? null 
+        : await getMemberRole(supabase, orgDetails.id, user.profile.id)
 
-  // Use profile from getCurrentUser() instead of duplicate lookup
-  const profile = user.profile
+      // Use profile from getCurrentUser() instead of duplicate lookup
+      const profile = user.profile
 
-  return {
-    organization: orgDetails,
-    member: memberRole ?? undefined,
-    profile,
-    isPlatformOwner: user.isPlatformOwner,
-  }
+      return {
+        organization: orgDetails,
+        member: memberRole ?? undefined,
+        profile,
+        isPlatformOwner: user.isPlatformOwner,
+      }
+    }
+  )
 }
 
 export async function getOrganizationContextBySlug(

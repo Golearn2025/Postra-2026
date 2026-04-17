@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/server/services/auth.service'
 import { getCurrentOrganizationContext, getOrganizationContextBySlug } from '@/server/services/organization.service'
+import { getSupabaseServerClient } from '@/server/supabase/server'
+import { getOrganizationOnboardingStatus } from '@/server/repositories/organization-profiles.repository'
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +27,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 })
     }
 
-    return NextResponse.json(context)
+    // Get onboarding status for routing decisions
+    const supabase = await getSupabaseServerClient()
+    const onboardingStatus = await getOrganizationOnboardingStatus(supabase, context.organization.id)
+
+    // Include onboarding status in response
+    const responseWithContext = {
+      ...context,
+      onboarding: onboardingStatus
+    }
+
+    return NextResponse.json(responseWithContext)
   } catch (error) {
     console.error('Failed to load organization context:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -41,6 +41,16 @@ export function Step3PlanningSetup({
   onNext,
   onPrevious,
 }: Step3Props) {
+  // Use approved model presets - no legacy configuration
+  const platformOptions = 
+    PLATFORM_OPTIONS.map(p => ({ id: p.value, label: p.label, order: 0, active: true }))
+  
+  const toneOptions = 
+    TONE_OF_VOICE_SUGGESTIONS.map(t => ({ id: t, label: t, order: 0, active: true }))
+  
+  const topicOptions = 
+    TOPIC_SUGGESTIONS.map(t => ({ id: t, label: t, order: 0, active: true }))
+
   // Prefill platforms from suggested platforms on first render
   useEffect(() => {
     if (platforms.length === 0 && suggestedPlatforms && suggestedPlatforms.length > 0) {
@@ -145,13 +155,16 @@ export function Step3PlanningSetup({
         </div>
         <p className="text-sm text-muted-foreground">Select where you'll publish this content</p>
         <div className="flex flex-wrap gap-2">
-          {PLATFORM_OPTIONS.map((platform) => (
+          {platformOptions
+            .filter(option => option.active)
+            .sort((a, b) => a.order - b.order)
+            .map((platform) => (
             <button
-              key={platform.value}
+              key={platform.id}
               type="button"
-              onClick={() => togglePlatform(platform.value)}
+              onClick={() => togglePlatform(platform.id)}
               className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                platforms.includes(platform.value)
+                platforms.includes(platform.id)
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border hover:border-primary/50'
               }`}
@@ -172,14 +185,17 @@ export function Step3PlanningSetup({
         </div>
         <p className="text-sm text-muted-foreground">Select up to {MAX_TONES} tones that define your brand voice</p>
         <div className="flex flex-wrap gap-2">
-          {TONE_OF_VOICE_SUGGESTIONS.map((tone) => {
-            const isSelected = toneOfVoice.includes(tone)
+          {toneOptions
+            .filter(option => option.active)
+            .sort((a, b) => a.order - b.order)
+            .map((tone) => {
+            const isSelected = toneOfVoice.includes(tone.id)
             const isDisabled = !isSelected && toneOfVoice.length >= MAX_TONES
             return (
               <button
-                key={tone}
+                key={tone.id}
                 type="button"
-                onClick={() => toggleTone(tone)}
+                onClick={() => toggleTone(tone.id)}
                 disabled={isDisabled}
                 className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
                   isSelected
@@ -189,7 +205,7 @@ export function Step3PlanningSetup({
                       : 'border-border hover:border-primary/50'
                 }`}
               >
-                {tone}
+                {tone.label}
               </button>
             )
           })}
@@ -201,18 +217,21 @@ export function Step3PlanningSetup({
         <Label className="text-base font-semibold">Focus Areas</Label>
         <p className="text-sm text-muted-foreground">Choose the themes or service angles this campaign should emphasize. (optional)</p>
         <div className="flex flex-wrap gap-2">
-          {TOPIC_SUGGESTIONS.map((topic) => (
+          {topicOptions
+            .filter(option => option.active)
+            .sort((a, b) => a.order - b.order)
+            .map((topic) => (
             <button
-              key={topic}
+              key={topic.id}
               type="button"
-              onClick={() => toggleTopic(topic)}
+              onClick={() => toggleTopic(topic.id)}
               className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                topics.includes(topic)
+                topics.includes(topic.id)
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border hover:border-primary/50'
               }`}
             >
-              {topic}
+              {topic.label}
             </button>
           ))}
         </div>

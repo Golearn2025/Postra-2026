@@ -19,6 +19,11 @@ export interface FileMetadata {
   format_group: string | null
   suggested_platforms: string[]
   campaign_id: string | null
+  // New metadata fields for AI brief generation
+  asset_title_short: string
+  asset_description: string
+  asset_tags: string
+  asset_ai_hint: string
 }
 
 interface FileReviewTableProps {
@@ -68,15 +73,18 @@ export function FileReviewTable({ filesMetadata, campaigns, onUpdate, onRemove }
 
       <div className="rounded-lg border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-xs min-w-[1400px]">
+          <table className="w-full text-xs min-w-[2000px]">
             <thead className="bg-muted/50 border-b">
               <tr>
                 <th className="px-4 py-3 text-left font-medium min-w-[80px]">Preview</th>
                 <th className="px-4 py-3 text-left font-medium min-w-[150px]">Filename</th>
+                <th className="px-4 py-3 text-left font-medium min-w-[180px]">Short Title</th>
                 <th className="px-4 py-3 text-left font-medium min-w-[220px]">Title</th>
                 <th className="px-4 py-3 text-left font-medium min-w-[220px]">Alt Text</th>
                 <th className="px-4 py-3 text-left font-medium min-w-[250px]">Description</th>
                 <th className="px-4 py-3 text-left font-medium min-w-[180px]">Tags</th>
+                <th className="px-4 py-3 text-left font-medium min-w-[200px]">Asset Tags</th>
+                <th className="px-4 py-3 text-left font-medium min-w-[250px]">AI Hint</th>
                 <th className="px-4 py-3 text-left font-medium min-w-[140px]">Format</th>
                 <th className="px-4 py-3 text-left font-medium min-w-[220px]">Platform</th>
                 <th className="px-4 py-3 text-left font-medium min-w-[180px]">Campaign</th>
@@ -111,6 +119,14 @@ export function FileReviewTable({ filesMetadata, campaigns, onUpdate, onRemove }
                     </td>
                     <td className="px-4 py-3">
                       <Input
+                        value={meta.asset_title_short}
+                        onChange={(e) => onUpdate(index, { asset_title_short: e.target.value })}
+                        className="h-9 text-xs min-w-[180px]"
+                        placeholder="Short title..."
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <Input
                         value={meta.title}
                         onChange={(e) => onUpdate(index, { title: e.target.value })}
                         className="h-9 text-xs min-w-[220px]"
@@ -140,6 +156,23 @@ export function FileReviewTable({ filesMetadata, campaigns, onUpdate, onRemove }
                         onChange={(e) => onUpdate(index, { tags: e.target.value })}
                         className="h-9 text-xs min-w-[180px]"
                         placeholder="Tags..."
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <Input
+                        value={meta.asset_tags}
+                        onChange={(e) => onUpdate(index, { asset_tags: e.target.value })}
+                        className="h-9 text-xs min-w-[200px]"
+                        placeholder="Asset tags..."
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <Textarea
+                        value={meta.asset_ai_hint}
+                        onChange={(e) => onUpdate(index, { asset_ai_hint: e.target.value })}
+                        className="h-9 text-xs resize-none min-w-[250px]"
+                        placeholder="AI hint..."
+                        rows={1}
                       />
                     </td>
                     <td className="px-4 py-3">

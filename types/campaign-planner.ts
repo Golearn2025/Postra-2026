@@ -34,8 +34,8 @@ export interface CampaignPlannerClientProps {
 }
 
 export interface SelectedCampaign extends AppCampaignsListItem {
-  objective?: string
-  target_audience?: string
+  objective: string | null
+  target_audience: string | null
 }
 
 export interface SelectedMedia extends AppMediaAssetsListItem {

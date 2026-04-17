@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { DbOrganization, DbOrganizationMember } from '@/types/database'
 import type { OrganizationSwitcherItem } from '@/types/organizations'
+import { performanceMonitor } from '@/server/lib/observability/performance'
 
 export async function getOrganizationsForUser(
   supabase: SupabaseClient,
@@ -54,27 +55,37 @@ export async function getAvailableOrganizationsForCurrentUser(
   userId: string,
   isPlatformOwner: boolean
 ): Promise<OrganizationSwitcherItem[]> {
-  if (isPlatformOwner) {
-    // Platform owners can see all organizations
-    const { data, error } = await supabase
-      .from('organizations')
-      .select('id, name, slug, brand_logo_url')
-      .order('name')
+  return performanceMonitor.measureDbQuery(
+    {
+      functionName: 'getAvailableOrganizationsForCurrentUser',
+      sourceType: isPlatformOwner ? 'table' : 'table',
+      sourceName: isPlatformOwner ? 'organizations' : 'organization_members',
+      userId
+    },
+    async () => {
+      if (isPlatformOwner) {
+        // Platform owners can see all organizations
+        const { data, error } = await supabase
+          .from('organizations')
+          .select('id, name, slug, brand_logo_url')
+          .order('name')
 
-    if (error || !data) return []
+        if (error || !data) return []
 
-    return data.map((org: any) => ({
-      id: org.id,
-      name: org.name,
-      slug: org.slug,
-      logo_url: org.brand_logo_url,
-      role: undefined,  // Platform owners don't have a member role
-      isPlatformOwner: true,
-    }))
-  }
+        return data.map((org: any) => ({
+          id: org.id,
+          name: org.name,
+          slug: org.slug,
+          logo_url: org.brand_logo_url,
+          role: undefined,  // Platform owners don't have a member role
+          isPlatformOwner: true,
+        }))
+      }
 
-  // Regular users only see organizations they're active members of
-  return getOrganizationsForUser(supabase, userId)
+      // Regular users only see organizations they're active members of
+      return getOrganizationsForUser(supabase, userId)
+    }
+  )
 }
 
 export async function getMemberRole(

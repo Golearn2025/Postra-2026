@@ -19,6 +19,11 @@ export const mediaMetadataSchema = z.object({
   transcript: z.string().max(5000).optional().nullable(),
   tags: z.string().optional().nullable(),
   suggested_platforms: z.array(z.enum(PLATFORMS)).optional().nullable(),
+  // New metadata fields for AI brief generation
+  asset_title_short: z.string().max(200).optional().nullable(),
+  asset_description: z.string().max(500).optional().nullable(),
+  asset_tags: z.string().optional().nullable(),
+  asset_ai_hint: z.string().max(300).optional().nullable(),
 })
 
 export type MediaMetadataFormValues = z.infer<typeof mediaMetadataSchema>

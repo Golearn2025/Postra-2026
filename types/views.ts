@@ -7,8 +7,9 @@ export interface AppCampaignsListItem {
   name: string | null
   slug: string | null
   status: 'draft' | 'active' | 'completed' | 'archived'
-  pillar: 'luxury' | 'airport' | 'corporate' | 'wedding' | 'testimonial' | 'promo' | 'educational' | 'seasonal' | 'general' | null
-  timezone: string | null
+  campaign_pillar: string | null
+  objective: string | null
+  target_audience: string | null
   target_market: string | null
   start_date: string | null
   end_date: string | null
@@ -16,6 +17,8 @@ export interface AppCampaignsListItem {
   created_at: string | null
   updated_at: string | null
   campaign_duration_days: number | null
+  schedule_type: 'date_range' | 'selected_dates' | null
+  selected_dates_count: number
 }
 
 export interface AppCampaignDetail {
@@ -24,20 +27,21 @@ export interface AppCampaignDetail {
   name: string | null
   slug: string | null
   status: 'draft' | 'active' | 'completed' | 'archived'
-  pillar: 'luxury' | 'airport' | 'corporate' | 'wedding' | 'testimonial' | 'promo' | 'educational' | 'seasonal' | 'general' | null
+  campaign_pillar: string | null
   objective: string | null
   target_audience: string | null
   target_market: string | null
-  timezone: string | null
   start_date: string | null
   end_date: string | null
   description: string | null
-  metadata: Record<string, unknown>
   created_at: string | null
   updated_at: string | null
   created_by: string | null
   updated_by: string | null
   campaign_duration_days: number | null
+  schedule_type: 'date_range' | 'selected_dates' | null
+  selected_dates_count: number
+  selected_dates: string[]
 }
 
 export interface AppPostsListItem {
@@ -114,6 +118,11 @@ export interface AppMediaAssetsListItem {
   hook_text: string | null
   tags: string[]
   suggested_platforms: string[]
+  // New metadata fields for AI brief generation
+  asset_title_short: string | null
+  asset_description: string | null
+  asset_tags: string[] | null
+  asset_ai_hint: string | null
   // Thumbnail fields for persistent preview support
   thumb_storage_path: string | null
   thumb_file_url: string | null
@@ -156,6 +165,11 @@ export interface AppMediaAssetDetail {
   tags: string[]
   suggested_platforms: string[]
   metadata: Record<string, unknown>
+  // New metadata fields for AI brief generation
+  asset_title_short: string | null
+  asset_description: string | null
+  asset_tags: string[] | null
+  asset_ai_hint: string | null
   created_at: string | null
   updated_at: string | null
   created_by: string | null

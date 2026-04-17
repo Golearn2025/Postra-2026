@@ -5,6 +5,25 @@ import { useRouter } from 'next/navigation'
 import type { AppUser } from '@/types/app'
 import type { OrganizationSwitcherItem, OrgContext } from '@/types/organizations'
 
+// Client-side logging utility for organization switches
+const logOrganizationSwitch = (fromOrgId: string, toOrgId: string, userId: string, duration: number, success: boolean, error?: string) => {
+  if (process.env.NODE_ENV === 'development') {
+    const logEntry = {
+      level: 'INFO',
+      scope: 'organization_switch',
+      functionName: 'switchOrganization',
+      userId,
+      fromOrganizationId: fromOrgId,
+      toOrganizationId: toOrgId,
+      durationMs: duration,
+      ok: success,
+      errorMessage: error,
+      timestamp: new Date().toISOString()
+    }
+    console.log(JSON.stringify(logEntry, null, 2))
+  }
+}
+
 interface OrganizationContextValue {
   availableOrgs: OrganizationSwitcherItem[]
   currentOrg: OrgContext | null
@@ -66,6 +85,10 @@ export function OrganizationProvider({
   const switchOrganization = async (slug: string) => {
     if (!availableOrgs.find(org => org.slug === slug)) return
 
+    const startTime = Date.now()
+    const fromOrgId = currentOrg?.organization.id || 'none'
+    const userId = initialUser?.profile.id || 'unknown'
+
     try {
       setError(null)
       
@@ -81,12 +104,34 @@ export function OrganizationProvider({
         
         const orgContext = await response.json()
         setCurrentOrg(orgContext)
+
+        // Log successful organization switch
+        const duration = Date.now() - startTime
+        logOrganizationSwitch(fromOrgId, targetOrg.id, userId, duration, true)
+
+        // Check if organization needs onboarding and route appropriately
+        const needsOnboarding = !orgContext.onboarding?.isOnboardingCompleted
+        
+        if (needsOnboarding) {
+          // Navigate to onboarding for incomplete organizations
+          router.push('/onboarding')
+          router.refresh()
+        } else {
+          // Navigate to app shell for complete organizations
+          // Use window.location.href for full navigation when switching from onboarding to app
+          window.location.href = '/dashboard'
+        }
       }
-      
-      // Minimal server-side revalidation - only for org-scoped data
-      router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to switch organization')
+      const duration = Date.now() - startTime
+      const error = err instanceof Error ? err.message : 'Failed to switch organization'
+      setError(error)
+      
+      // Log failed organization switch
+      const targetOrg = availableOrgs.find(org => org.slug === slug)
+      if (targetOrg) {
+        logOrganizationSwitch(fromOrgId, targetOrg.id, userId, duration, false, error)
+      }
     }
   }
 

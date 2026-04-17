@@ -4,7 +4,9 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CAMPAIGN_STATUSES, CAMPAIGN_PILLARS } from '../schemas/campaign.schema'
+import { CAMPAIGN_PILLAR_OPTIONS } from '../constants/campaign-options'
+
+const CAMPAIGN_STATUSES = ['draft', 'active', 'paused'] as const
 import { useCallback, useTransition } from 'react'
 
 export function CampaignFilters() {
@@ -65,8 +67,8 @@ export function CampaignFilters() {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All pillars</SelectItem>
-          {CAMPAIGN_PILLARS.map((p) => (
-            <SelectItem key={p} value={p} className="capitalize">{p.replace('_', ' ')}</SelectItem>
+          {CAMPAIGN_PILLAR_OPTIONS.map((p) => (
+            <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
           ))}
         </SelectContent>
       </Select>

@@ -52,6 +52,11 @@ export interface AIBriefParams {
     title: string
     description: string
     tags: string[]
+    // New metadata fields for AI context
+    assetTitleShort?: string
+    assetDescription?: string
+    assetTags?: string[]
+    assetAiHint?: string
   }>
   platforms: string[]
   toneOfVoice: string[]

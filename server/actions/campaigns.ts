@@ -1,60 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { getSupabaseServerClient } from '@/server/supabase/server'
 import { getCurrentUser } from '@/server/services/auth.service'
-import { createCampaign, updateCampaign } from '@/server/repositories/campaigns.repository'
-import { campaignSchema } from '@/features/campaigns/schemas/campaign.schema'
-import type { CampaignFormValues } from '@/features/campaigns/schemas/campaign.schema'
-
-export async function createCampaignAction(
-  organizationId: string,
-  values: CampaignFormValues
-): Promise<{ error?: string; id?: string } | never> {
-  const user = await getCurrentUser()
-  if (!user) {
-    return { error: 'Unauthorized' }
-  }
-
-  const parsed = campaignSchema.safeParse(values)
-  if (!parsed.success) {
-    return { error: parsed.error.errors[0]?.message ?? 'Invalid data' }
-  }
-
-  const supabase = await getSupabaseServerClient()
-  const campaign = await createCampaign(supabase, organizationId, user.profile.id, parsed.data)
-
-  if (!campaign) {
-    return { error: 'Failed to create campaign. Please try again.' }
-  }
-
-  revalidatePath('/campaigns')
-  redirect(`/campaigns/${campaign.id}` as any)
-}
-
-export async function updateCampaignAction(
-  campaignId: string,
-  organizationId: string,
-  values: CampaignFormValues
-): Promise<{ error?: string } | never> {
-  const user = await getCurrentUser()
-  if (!user) return { error: 'Unauthorized' }
-
-  const parsed = campaignSchema.safeParse(values)
-  if (!parsed.success) {
-    return { error: parsed.error.errors[0]?.message ?? 'Invalid data' }
-  }
-
-  const supabase = await getSupabaseServerClient()
-  const campaign = await updateCampaign(supabase, campaignId, organizationId, user.profile.id, parsed.data)
-
-  if (!campaign) return { error: 'Failed to update campaign. Please try again.' }
-
-  revalidatePath(`/campaigns/${campaignId}`)
-  revalidatePath('/campaigns')
-  redirect('/campaigns?success=updated' as any)
-}
 
 export async function archiveCampaignAction(
   campaignId: string

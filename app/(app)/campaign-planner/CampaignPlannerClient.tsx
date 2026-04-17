@@ -55,6 +55,11 @@ export function CampaignPlannerClient({ organizationId, userId, campaigns, media
             title: sanitizeString(m.title),
             description: sanitizeString(m.description),
             tags: sanitizeStringArray(m.tags),
+            // New metadata fields for AI context
+            assetTitleShort: sanitizeString(m.asset_title_short),
+            assetDescription: sanitizeString(m.asset_description),
+            assetTags: sanitizeStringArray(m.asset_tags),
+            assetAiHint: sanitizeString(m.asset_ai_hint),
           })),
           platforms: wizardState.platforms || [],
           toneOfVoice: wizardState.toneOfVoice || [],
