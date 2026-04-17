@@ -111,6 +111,76 @@ export async function getCampaignsListByOrganization(
   )
 }
 
+export async function getCampaignsArchivedListByOrganization(
+  supabase: SupabaseClient,
+  organizationId: string,
+  filters: CampaignFilters = {},
+  sort: CampaignSortOptions = {},
+  pagination: CampaignPaginationOptions = {}
+): Promise<CampaignsListResult> {
+  return performanceMonitor.measureDbQuery(
+    {
+      functionName: 'getCampaignsArchivedListByOrganization',
+      sourceType: 'view',
+      sourceName: 'app_campaigns_archived_list',
+      organizationId
+    },
+    async () => {
+      // Get total count first
+      let countQuery = supabase
+        .from('app_campaigns_archived_list')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+
+      if (filters.search) {
+        countQuery = countQuery.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+      }
+      if (filters.status) countQuery = countQuery.eq('status', filters.status)
+      if (filters.pillar) countQuery = countQuery.eq('campaign_pillar', filters.pillar)
+
+      const { count } = await countQuery
+
+      // Build main query
+      let query = supabase
+        .from('app_campaigns_archived_list')
+        .select('*')
+        .eq('organization_id', organizationId)
+
+      // Apply filters
+      if (filters.search) {
+        query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+      }
+      if (filters.status) query = query.eq('status', filters.status)
+      if (filters.pillar) query = query.eq('campaign_pillar', filters.pillar)
+
+      // Apply sorting - default to archived_at DESC (most recently archived first)
+      const sortColumn = sort.column || 'archived_at'
+      const sortDirection = sort.direction || 'desc'
+      query = query.order(sortColumn, { ascending: sortDirection === 'asc' })
+
+      // Apply pagination
+      const page = pagination.page || 1
+      const pageSize = pagination.pageSize || 25
+      const from = (page - 1) * pageSize
+      const to = from + pageSize - 1
+      query = query.range(from, to)
+
+      const { data, error } = await query
+      if (error) {
+        console.error('getCampaignsArchivedListByOrganization error:', error)
+        return { data: [], total: 0, page, pageSize }
+      }
+
+      return {
+        data: data as AppCampaignsListItem[],
+        total: count || 0,
+        page,
+        pageSize,
+      }
+    }
+  )
+}
+
 export async function getCampaignDetailById(
   supabase: SupabaseClient,
   campaignId: string,
@@ -317,11 +387,12 @@ export async function createCampaign(
   console.log('[REPO] campaignData before insert:', campaignData)
   console.log('[REPO] campaignData.slug before insert:', campaignData.slug)
   
-  // Check for existing campaigns with same organization
+  // Check for existing campaigns with same organization (excluding archived)
   const { data: existingCampaigns, error: checkError } = await supabase
     .from('content_campaigns')
     .select('id, name, slug')
     .eq('organization_id', organizationId)
+    .is('archived_at', null)
   
   console.log('[REPO] Existing campaigns:', existingCampaigns)
   console.log('[REPO] Check error:', checkError)

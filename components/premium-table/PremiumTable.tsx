@@ -135,7 +135,7 @@ export function PremiumTable<T>({
                       compact ? "py-2" : "py-3"
                     )}>
                       <div className="flex items-center justify-end gap-1">
-                        {actions.slice(0, 2).map((action, actionIndex) => {
+                        {actions.slice(0, 4).map((action, actionIndex) => {
                           const Icon = action.icon
                           const isDisabled = action.disabled?.(item)
                           
@@ -155,7 +155,7 @@ export function PremiumTable<T>({
                             </Button>
                           )
                         })}
-                        {actions.length > 2 && (
+                        {actions.length > 4 && (
                           <Button
                             size="sm"
                             variant="ghost"
@@ -166,9 +166,9 @@ export function PremiumTable<T>({
                           </Button>
                         )}
                       </div>
-                      {isExpanded && actions.length > 2 && (
+                      {isExpanded && actions.length > 4 && (
                         <div className="absolute right-4 mt-2 bg-white dark:bg-slate-800 border rounded-lg shadow-lg p-1 z-10">
-                          {actions.slice(2).map((action, actionIndex) => {
+                          {actions.slice(4).map((action, actionIndex) => {
                             const Icon = action.icon
                             const isDisabled = action.disabled?.(item)
                             

@@ -1,9 +1,9 @@
 'use client'
 
 import { CheckCircle, XCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, type ButtonProps } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeProps } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useState } from 'react'
 import type { ImportSummary } from '../schemas/bulk-import.schema'

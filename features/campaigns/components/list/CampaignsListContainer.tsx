@@ -4,12 +4,17 @@ import { useState } from 'react'
 import { LayoutGrid, Table } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PremiumPagination } from '@/components/premium-table/PremiumPagination'
+import { CampaignsTabs } from './CampaignsTabs'
 import { CampaignsListTable } from './CampaignsListTable'
 import { CampaignsListCards } from './CampaignsListCards'
 import type { AppCampaignsListItem } from '@/types/views'
 
+type CampaignTab = 'active' | 'archived'
+
 interface CampaignsListContainerProps {
   campaigns: AppCampaignsListItem[]
+  activeTab?: CampaignTab
+  onTabChange?: (tab: CampaignTab) => void
   pagination?: {
     currentPage: number
     totalPages: number
@@ -20,7 +25,12 @@ interface CampaignsListContainerProps {
   }
 }
 
-export function CampaignsListContainer({ campaigns, pagination }: CampaignsListContainerProps) {
+export function CampaignsListContainer({ 
+  campaigns, 
+  activeTab = 'active', 
+  onTabChange, 
+  pagination 
+}: CampaignsListContainerProps) {
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table')
 
   return (
@@ -60,7 +70,7 @@ export function CampaignsListContainer({ campaigns, pagination }: CampaignsListC
       <div className="space-y-4">
         {viewMode === 'table' ? (
           <div className="space-y-4">
-            <CampaignsListTable campaigns={campaigns} />
+            <CampaignsListTable campaigns={campaigns} activeTab={activeTab} />
             {/* Premium Pagination - Always Visible - Below Table */}
             <PremiumPagination
               currentPage={pagination?.currentPage || 1}

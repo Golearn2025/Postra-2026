@@ -6,10 +6,11 @@ import { PageHeader } from '@/components/shared/PageHeader'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
 import { CampaignsListClientWrapper } from '@/features/campaigns/components/list/CampaignsListClientWrapper'
+import { CampaignsTabsWrapper } from '@/features/campaigns/components/CampaignsTabsWrapper'
 import { CampaignFilters } from '@/features/campaigns/components/CampaignFilters'
 import { getCurrentUser } from '@/server/services/auth.service'
 import { getCurrentOrganizationContext } from '@/server/services/organization.service'
-import { getCampaignsListByOrganization } from '@/server/repositories/campaigns.repository'
+import { getCampaignsListByOrganization, getCampaignsArchivedListByOrganization } from '@/server/repositories/campaigns.repository'
 import { getSupabaseServerClient } from '@/server/supabase/server'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -29,6 +30,7 @@ interface CampaignsPageProps {
     sortBy?: string
     sortDir?: string
     success?: string
+    tab?: 'active' | 'archived'
   }>
 }
 
@@ -57,24 +59,44 @@ export default async function CampaignsPage({ searchParams }: CampaignsPageProps
 
       const params = await searchParams
       const supabase = await getSupabaseServerClient()
+      const activeTab = params.tab || 'active'
       
-      const result = await getCampaignsListByOrganization(
-        supabase,
-        orgContext.organization.id,
-        {
-          search: params.search,
-          status: params.status,
-          pillar: params.pillar,
-        },
-        {
-          column: params.sortBy,
-          direction: params.sortDir as 'asc' | 'desc' | undefined,
-        },
-        {
-          page: params.page ? parseInt(params.page) : 1,
-          pageSize: params.pageSize ? parseInt(params.pageSize) : 25,
-        }
-      )
+      // Fetch data based on active tab
+      const result = activeTab === 'archived' 
+        ? await getCampaignsArchivedListByOrganization(
+            supabase,
+            orgContext.organization.id,
+            {
+              search: params.search,
+              status: params.status,
+              pillar: params.pillar,
+            },
+            {
+              column: params.sortBy,
+              direction: params.sortDir as 'asc' | 'desc' | undefined,
+            },
+            {
+              page: params.page ? parseInt(params.page) : 1,
+              pageSize: params.pageSize ? parseInt(params.pageSize) : 25,
+            }
+          )
+        : await getCampaignsListByOrganization(
+            supabase,
+            orgContext.organization.id,
+            {
+              search: params.search,
+              status: params.status,
+              pillar: params.pillar,
+            },
+            {
+              column: params.sortBy,
+              direction: params.sortDir as 'asc' | 'desc' | undefined,
+            },
+            {
+              page: params.page ? parseInt(params.page) : 1,
+              pageSize: params.pageSize ? parseInt(params.pageSize) : 25,
+            }
+          )
 
       const campaigns = result.data
 
@@ -97,7 +119,10 @@ export default async function CampaignsPage({ searchParams }: CampaignsPageProps
           )}
 
           <Suspense>
-            <CampaignFilters />
+            <div className="flex items-center justify-between gap-4">
+              <CampaignFilters />
+              <CampaignsTabsWrapper activeTab={activeTab} />
+            </div>
           </Suspense>
 
           {campaigns.length === 0 ? (
@@ -120,6 +145,7 @@ export default async function CampaignsPage({ searchParams }: CampaignsPageProps
           ) : (
             <CampaignsListClientWrapper 
               campaigns={campaigns}
+              activeTab={activeTab}
               initialPage={result.page}
               totalPages={Math.ceil(result.total / result.pageSize)}
               totalItems={result.total}

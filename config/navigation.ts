@@ -11,6 +11,7 @@ import {
   Sparkles,
   Settings,
   Wand2,
+  Building,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -61,7 +62,7 @@ export const mainNavSections: NavSection[] = [
   {
     title: 'System',
     items: [
-      { label: 'Settings', href: '/settings', icon: Settings },
+      { label: 'Organization', href: '/organization', icon: Building },
     ],
   },
 ]

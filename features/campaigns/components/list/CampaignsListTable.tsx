@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { Eye, Edit2, Archive, Trash2 } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Eye, Edit2, Archive, Trash2, RotateCcw } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { formatDate } from '@/lib/formatters/date'
 import type { AppCampaignsListItem } from '@/types/views'
-import { archiveCampaignAction, deleteCampaignAction, toggleCampaignStatusAction } from '@/server/actions/campaigns'
+import { archiveCampaignAction, deleteCampaignAction, toggleCampaignStatusAction, restoreCampaignAction, bulkDeleteCampaignsAction } from '@/server/actions/campaigns'
 import { PremiumTable } from '@/components/premium-table/PremiumTable'
 import { 
   getPillarLabel, 
@@ -21,12 +21,17 @@ import {
 
 interface CampaignsListTableProps {
   campaigns: AppCampaignsListItem[]
+  activeTab?: 'active' | 'archived'
 }
 
-export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
+export function CampaignsListTable({ campaigns, activeTab = 'active' }: CampaignsListTableProps) {
   console.log('CampaignsListTable rendered with campaigns:', campaigns.length)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
+  
+  // Force read from URL to override incorrect activeTab prop
+  const actualTab = (searchParams.get('tab') as 'active' | 'archived') || activeTab
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set())
   const [showBulkActions, setShowBulkActions] = useState(false)
 
@@ -52,6 +57,22 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
       setSelectedRows(new Set())
       setShowBulkActions(false)
     }
+  }
+
+  const handleArchiveSelected = async () => {
+    if (selectedRows.size === 0) return
+    
+    const confirmed = confirm(`Archive ${selectedRows.size} campaign${selectedRows.size === 1 ? '' : 's'}?`)
+    if (!confirmed) return
+
+    startTransition(async () => {
+      for (const campaignId of selectedRows) {
+        await archiveCampaignAction(campaignId)
+      }
+      setSelectedRows(new Set())
+      setShowBulkActions(false)
+      router.refresh()
+    })
   }
 
   const handleDeleteSelected = async () => {
@@ -150,6 +171,39 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
     startTransition(async () => {
       await deleteCampaignAction(campaign.id)
       router.refresh()
+    })
+  }
+
+  const handleRestore = async (campaign: AppCampaignsListItem) => {
+    if (!confirm('Restore this campaign?')) return
+    startTransition(async () => {
+      const result = await restoreCampaignAction(campaign.id)
+      if (result.error) {
+        alert(result.error)
+      } else {
+        router.refresh()
+      }
+    })
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedRows.size === 0) return
+    
+    const confirmMessage = `Delete ${selectedRows.size} campaign${selectedRows.size !== 1 ? 's' : ''} permanently? This action cannot be undone.`
+    if (!confirm(confirmMessage)) return
+    
+    startTransition(async () => {
+      const campaignIds = Array.from(selectedRows)
+      const result = await bulkDeleteCampaignsAction(campaignIds)
+      
+      if (result.error) {
+        alert(result.error)
+      } else {
+        alert(`Successfully deleted ${result.deletedCount} campaign${result.deletedCount !== 1 ? 's' : ''}.`)
+        setSelectedRows(new Set())
+        setShowBulkActions(false)
+        router.refresh()
+      }
     })
   }
 
@@ -305,7 +359,27 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
     }
   ]
 
-  const actions = [
+  const actions = actualTab === 'archived' ? [
+    {
+      label: 'View',
+      icon: Eye,
+      onClick: handleView,
+      disabled: () => isPending
+    },
+    {
+      label: 'Restore',
+      icon: RotateCcw,
+      onClick: handleRestore,
+      disabled: () => isPending
+    },
+    {
+      label: 'Delete Permanently',
+      icon: Trash2,
+      onClick: handleDelete,
+      variant: 'destructive' as const,
+      disabled: () => isPending
+    }
+  ] : [
     {
       label: 'View',
       icon: Eye,
@@ -333,11 +407,16 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
     }
   ]
 
+  // Debugging - remove after fixing
+  console.log('DEBUG - activeTab prop:', activeTab, 'actualTab from URL:', actualTab)
+  console.log('DEBUG - showBulkActions:', showBulkActions)
+  console.log('DEBUG - selectedRows.size:', selectedRows.size)
+
   return (
     <div className="space-y-4">
       {/* Bulk Actions Bar */}
       {showBulkActions && (
-        <Card className="p-4 border-blue-200 bg-blue-50">
+        <Card className={`p-4 ${actualTab === 'archived' ? 'border-red-200 bg-red-50' : 'border-blue-200 bg-blue-50'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">
@@ -345,14 +424,25 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
               </span>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteSelected}
-                disabled={selectedRows.size === 0 || isPending}
-              >
-                Delete Selected
-              </Button>
+              {actualTab === 'archived' ? (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  disabled={selectedRows.size === 0 || isPending}
+                >
+                  Delete Permanently
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleArchiveSelected}
+                  disabled={selectedRows.size === 0 || isPending}
+                >
+                  Archive Selected
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

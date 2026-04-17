@@ -6,6 +6,7 @@ import type { AppCampaignsListItem } from '@/types/views'
 
 interface CampaignsListClientWrapperProps {
   campaigns: AppCampaignsListItem[]
+  activeTab?: 'active' | 'archived'
   initialPage: number
   totalPages: number
   totalItems: number
@@ -14,6 +15,7 @@ interface CampaignsListClientWrapperProps {
 
 export function CampaignsListClientWrapper({
   campaigns,
+  activeTab = 'active',
   initialPage,
   totalPages,
   totalItems,
@@ -21,6 +23,12 @@ export function CampaignsListClientWrapper({
 }: CampaignsListClientWrapperProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
+
+  // Get current tab from URL params, fallback to prop
+  const tabFromUrl = searchParams.get('tab')
+  console.log('DEBUG ClientWrapper - tabFromUrl:', tabFromUrl, 'activeTab prop:', activeTab)
+  const currentTab = (tabFromUrl as 'active' | 'archived') || activeTab
+  console.log('DEBUG ClientWrapper - currentTab:', currentTab)
 
   const currentPage = parseInt(searchParams.get('page') || initialPage.toString())
   const currentItemsPerPage = parseInt(searchParams.get('pageSize') || itemsPerPage.toString())
@@ -38,9 +46,18 @@ export function CampaignsListClientWrapper({
     router.push(`/campaigns?${params.toString()}`)
   }
 
+  const handleTabChange = (newTab: 'active' | 'archived') => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', newTab)
+    params.delete('page') // Reset to page 1 when switching tabs
+    router.push(`/campaigns?${params.toString()}`)
+  }
+
   return (
     <CampaignsListContainer 
       campaigns={campaigns}
+      activeTab={currentTab}
+      onTabChange={handleTabChange}
       pagination={{
         currentPage,
         totalPages: Math.ceil(totalItems / currentItemsPerPage),
