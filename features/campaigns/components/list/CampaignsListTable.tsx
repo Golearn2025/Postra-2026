@@ -77,7 +77,7 @@ export function CampaignsListTable({ campaigns }: CampaignsListTableProps) {
       newStatus = 'active'
     } else if (campaign.status === 'active') {
       newStatus = 'paused'
-    } else if (campaign.status === 'paused') {
+    } else if (campaign.status === 'paused' as string) {
       newStatus = 'active'
     } else {
       // For completed, archived, or expired, don't allow toggle
