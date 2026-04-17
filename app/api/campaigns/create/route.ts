@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/server/services/auth.service'
 import { createCampaignAction } from '@/server/actions/campaigns/create-campaign.action'
-import type { CreateCampaignFormData } from '@/types/campaigns'
 
 export async function POST(request: NextRequest) {
   try {

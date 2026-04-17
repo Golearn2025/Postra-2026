@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { ReactNode } from 'react'
 
 interface Column<T> {
@@ -13,7 +12,7 @@ interface Column<T> {
   width?: string
   className?: string
   headerClassName?: string
-  render?: (value: any, item: T, index: number) => React.ReactNode
+  render?: (value: unknown, item: T, index: number) => React.ReactNode
 }
 
 interface Action<T> {

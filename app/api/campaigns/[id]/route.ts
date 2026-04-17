@@ -57,7 +57,7 @@ export async function PATCH(
     }
 
     // Update campaign
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       updated_at: new Date().toISOString()
     }
 
